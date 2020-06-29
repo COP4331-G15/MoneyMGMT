@@ -37,7 +37,7 @@ Ryan Gordon | ROLE | ROLE
 Jeffrey Ramos | ROLE | ROLE
 Moises D. Cortes Lugo | ROLE | ROLE
 Austin Traub | ROLE | ROLE
-Erik Bates | API | ROLE
+Erik Bates | ROLE | ROLE
 
 ## Technologies 
 
