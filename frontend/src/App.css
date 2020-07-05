@@ -1,0 +1,39 @@
+.groupList, .memberList, .expenseList {
+	list-style-type: none;
+	width: max-content;
+	min-width: 30%;
+}
+
+.groupEntry, .groupMember, .expense {
+	padding: 10px;
+	display: block;
+	border: 2px solid black;
+	margin-bottom: 10px;
+}
+
+.balancePositive {
+	color: green;
+}
+
+.balanceNegative {
+	color: red;
+}
+
+.group__viewmembers {
+	margin-right: 20px;
+
+}
+
+.group__viewmembers, .group__viewexpenses, .memberList .paybackBtn {
+	border: 2px solid black;
+	margin: 5px;
+	padding: 5px;
+	background-color: lightgray;
+	color: black;
+	text-decoration: none;
+	display: inline-block;
+}
+
+.group__viewmembers:hover, .group__viewexpenses:hover {
+	background-color: darkgray;
+}

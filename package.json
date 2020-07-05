@@ -4,7 +4,9 @@
   "main": "server.js",
   "license": "MIT",
   "scripts": {
-    "start": "node server"
+    "start": "node server",
+    "dev": "concurrently \"nodemon -r dotenv/config server.js\" \"cd frontend && npm run start\"",
+    "heroku-postbuild": "cd frontend && npm install && npm run build"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -13,5 +15,9 @@
     "mongod": "^2.0.0",
     "mongoose": "^5.9.20",
     "node": "^14.4.0"
+  },
+  "devDependencies": {
+    "concurrently": "^5.2.0",
+    "nodemon": "^2.0.4"
   }
 }
