@@ -9,6 +9,8 @@ const validateLoginInput = require("../../validation/login");
 
 // Load User Model
 const User = require("../../server/models/User");
+
+
 const e = require("express");
 const { brotliCompress } = require("zlib");
 
@@ -36,17 +38,17 @@ User.findOne({ email: req.body.email }).then(user => {
             password: req.body.password
         });
 
-    // Hashing pwd before saving in DB
-    bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) throw err;
-            newUser.password = hash;
-            newUser
+        // Hashing pwd before saving in DB
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(newUser.password, salt, (err, hash) => {
+                if (err) throw err;
+                newUser.password = hash;
+                newUser
                 .save()
                 .then(user => res.json(user))
                 .catch(er => console.log(err));
-        });
+                });
+            });
+        }
     });
-    }
-});
 });
