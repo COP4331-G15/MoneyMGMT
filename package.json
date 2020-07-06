@@ -1,20 +1,31 @@
 {
-  "name": "azure_example",
+  "name": "merid",
   "version": "1.0.0",
   "main": "server.js",
   "license": "MIT",
   "scripts": {
-    "start": "node server",
+    "start": "node server.js",
+    "app": "nodemon server.js",
     "dev": "concurrently \"nodemon -r dotenv/config server.js\" \"cd frontend && npm run start\"",
     "heroku-postbuild": "cd frontend && npm install && npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/COP4331-G15/MoneyMGMT"
+  },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "mongod": "^2.0.0",
-    "mongoose": "^5.9.20",
-    "node": "^14.4.0"
+    "is-empty": "^1.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.5.9",
+    "mongoose": "^5.9.21",
+    "node": "^14.4.0",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "validator": "^13.1.1"
   },
   "devDependencies": {
     "concurrently": "^5.2.0",

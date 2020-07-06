@@ -2,7 +2,7 @@
  * TEST API's 
  */
 const router = require('express').Router();
-const Thought = require('../models/Thought');
+const Thought = require('../models/User');
 
 /**
  * URL: localhost:8001/api/thoughts/
