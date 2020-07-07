@@ -52,3 +52,29 @@ User.findOne({ email: req.body.email }).then(user => {
         }
     });
 });
+
+// @route POST api/users/login
+// @desc Login user and return JWT Token
+// @access Public
+
+router.post(/login", ( req, res ) => {
+    // more Form validation
+
+    const { errors, isValid } = validateLoginInput(req.body);
+
+    // Check validation
+    if ( !isValid ) {
+        return res.status(400).json(errors);
+    }
+    
+    const email = req.body.email;
+    const password = req.body.password;
+
+    // Find user by email
+    User.findOne({ email }).then(user => {
+        // Does User Exist?
+        if ( !user ) {
+            return res.status(404).json({ emailnotfound: "Email not found"})
+        }
+    })
+})
