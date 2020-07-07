@@ -1,7 +1,8 @@
-const express = require("express");
+const express = require( "express" );
 const router = express.Router();
-const bcrypt = require("bcryptjs");
-const keys = require("../../config/keys");
+const bcrypt = require( "bcryptjs" );
+const jwt = require( "jsonwebtoken" );
+const keys = require( "../../config/keys" );
 
 // Load the input validation 
 const validateRegInput = require("../../validation/register");
@@ -11,8 +12,9 @@ const validateLoginInput = require("../../validation/login");
 const User = require("../../server/models/User");
 
 
-const e = require("express");
-const { brotliCompress } = require("zlib");
+//const e = require("express");
+//const { brotliCompress } = require("zlib");
+const { ExtractJwt } = require("passport-jwt");
 
 
 // @route POST api/users/register
@@ -57,10 +59,10 @@ User.findOne({ email: req.body.email }).then(user => {
 // @desc Login user and return JWT Token
 // @access Public
 
-router.post(/login", ( req, res ) => {
+router.post("/login", ( req, res ) => {
     // more Form validation
 
-    const { errors, isValid } = validateLoginInput(req.body);
+    const{ errors, isValid } = validateLoginInput(req.body);
 
     // Check validation
     if ( !isValid ) {
@@ -74,7 +76,41 @@ router.post(/login", ( req, res ) => {
     User.findOne({ email }).then(user => {
         // Does User Exist?
         if ( !user ) {
-            return res.status(404).json({ emailnotfound: "Email not found"})
+            return res.status(404).json({ emailnotfound: "Email not found" });
         }
-    })
-})
+
+        // Pwd Check
+        bcrypt.compare( password, user.password ).then( isMatch => {
+            if ( isMatch ) {
+                // Match , Create JWT payload
+                const payload = {
+                    id:user.id,
+                    name: user.name
+                };
+
+
+                jwt.sign(
+                    payload,
+                    keys.secretOrKey,
+                    {
+                        // one yr in seconds
+                        expiresIn: 31556926
+                    },
+                    ( err, token ) => {
+                        res.json({
+                            success: true,
+                            token: "Bearer " + token
+                        });
+                    }
+                );
+            }   else{
+                return res
+                    .status(400)
+                    .json({ passwordincorrect: "Password incorrect" });
+            }
+        });
+    });
+});
+
+module.exports = router;
+

@@ -1,17 +1,38 @@
-require('dotenv').config();
-require('./server/db-conn');
+//require( 'dotenv' ).config();
+//require( './server/db-conn' );
 
-const path = require('path');
-const express = require('express');
-const bodyParser = require('body-parser');
+const path = require( "path" );
+const express = require( "express" );
+const mongoose = require("mongoose");
+const bodyParser = require( "body-parser" );
+const passport = require( "passport" );
+
+const users = require( "./routes/api/users" );
 
 const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 
-// mount routes
-app.use('/api/thoughts/', require('./server/routes/thoughts-route'));
-app.use('/fakeapi/', require('./server/routes/fakeapi.js'));
+// bodyParser Middleware
+app.use(
+	bodyParser.urlencoded({
+		extended: false
+	})
+);
+app.use( bodyParser.json() );
+
+// NEW db config
+const db = require( "./config/keys" ).mongoURI;
+
+// NEW connect to MongoDB
+mongoose
+	.connect(
+		db,
+		{ useNewUrlParser: true, useUnifiedTopology: true }
+	)
+	.then( () => console.log( "MongoDB successfully connected" ) )
+	.catch( err => console.log(err) );
+
+
+
 
 // React
 app.use(express.static(path.join(__dirname, 'frontend/build')));
@@ -21,5 +42,18 @@ app.get('*', (req, res) => {
 
 
 
-const { PORT } = process.env;
-app.listen(PORT, () => console.log(`Wizardry happening on port ${PORT}`));
+
+
+
+
+// passport Middleware
+app.use( passport.initialize() );
+
+// passport configuration
+require( "./config/passport" )( passport );
+
+// Routes
+app.use( "/routes/api/users", users );
+
+const port = process.env.PORT || 8001;
+app.listen( port, () => console.log( `Server up and running on port ${port} !` ) );
