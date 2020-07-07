@@ -22,7 +22,12 @@ function GroupsPage({userId}) {
 	const groups = !groupsData.loaded ? "Loading..." : displayGroups(groupsData.groups);
 	return (<div>
 		<h1>Your groups:</h1>
-		{groups}
+		<div>
+			<button className="button newGroupBtn">New group</button>
+		</div>
+		<div>
+				{groups}
+		</div>
 		</div>);
 }
 
@@ -34,7 +39,10 @@ function displayGroups(groups) {
 					<div>Name: {group.name}</div>
 					<div className="groupTotalExpenses">Total expenses: ${group.totalExpenses}</div>
 					<div className="groupUserBalance">Your balance: <Balance bal={group.userBalance}/></div>
-					<div><Link to={`/group/${group.id}/members`} className="group__viewmembers">View members</Link><Link to={`/group/${group.id}/expenses`} className="group__viewexpenses">View expense log</Link></div>
+					<div>
+						<Link to={`/group/${group.id}/members`} className="button group__viewmembers">View members</Link>
+						<Link to={`/group/${group.id}/expenses`} className="button group__viewexpenses">View expense log</Link>
+					</div>
 				</li>
 			))}
 		</ul>

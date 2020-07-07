@@ -24,7 +24,7 @@
 
 }
 
-.group__viewmembers, .group__viewexpenses, .memberList .paybackBtn {
+.button {
 	border: 2px solid black;
 	margin: 5px;
 	padding: 5px;
@@ -34,6 +34,6 @@
 	display: inline-block;
 }
 
-.group__viewmembers:hover, .group__viewexpenses:hover {
+.button:hover {
 	background-color: darkgray;
 }

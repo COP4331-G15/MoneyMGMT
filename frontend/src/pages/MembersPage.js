@@ -39,7 +39,7 @@ function displayMembers(members) {
 				<li key={member.id} className="groupMember">
 					<div>{member.name}</div>
 					<div className="yourBalance">Your balance: <Balance bal={member.amount}/></div>
-					<div><Link to="" className="paybackBtn">Pay back</Link></div>
+					<div><Link to="" className="button paybackBtn">Pay back</Link></div>
 				</li>
 			))}
 		</ul>
