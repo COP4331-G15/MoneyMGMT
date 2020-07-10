@@ -81,11 +81,13 @@ router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false
         },
         {
             "$project": {
-                "total": { "$sum": "$balance.total" }
+                "total": { "$sum": "$balance.total" },
+                "name": true
             }
         }
     ]).toArray();
     groups.then((result) => {
+        console.log(result);
         const returnedGroups = result.map(e => {
             return {name: e.name, id: e._id.toString(), balance: e.total};
         })
@@ -93,14 +95,20 @@ router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false
     });
 });
 
-router.get('/group/:groupId/balance/:userId', (req, res, next) => {
+router.get('/group/:groupId/balance/:userId', passport.authenticate('jwt', { session: false }), (req, res, next) => {
     const {groupId, userId} = req.params;
-
+    // TODO: improve
+    if (req.params.userId !== req.user._id.toString()) {
+        res.status(401);
+        res.json({error:"No access"});
+        console.log(req.params.userId +" !== "+req.user._id);
+        return;
+    }
 
     const users = mongoose.connection.collection("groups").aggregate(
     [
         {
-            $match: {_id: new ObjectID(groupId)}
+            $match: {_id: new ObjectID(groupId), members: new ObjectID(userId)}
         },
         
         {
@@ -135,10 +143,14 @@ router.get('/group/:groupId/balance/:userId', (req, res, next) => {
         }
     ]).toArray();
     users.then((result) => {
-        
+        if (result.length === 0) {
+            res.status(401);
+            res.json({error: "Invalid"})
+            return;
+        }
         const returnedMembers = result.map(e => {
             console.log(e)
-            return {name: e.members.name, id: e._id.toString(), balance: e.balance.length < 1 ? 0 : e.balance[0].total};
+            return {name: e.members.name, id: e.members._id.toString(), balance: e.balance.length < 1 ? 0 : e.balance[0].total};
         })
         res.json({members: returnedMembers});
     });

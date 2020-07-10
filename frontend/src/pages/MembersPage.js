@@ -1,29 +1,49 @@
 import React, {useState, useEffect} from 'react';
 import Balance from '../components/Balance';
 import {Link, useParams} from "react-router-dom";
+import User from '../components/User';
 
-function MembersPage() {
+function MembersPage({account}) {
 	let { groupId } = useParams();
-	// TODO: current userId
-	let userId = "fakeuserid";
 	const [membersData, setMembersData] = useState({loaded: false});
 	useEffect(() => {
 		
-		fetch(`/fakeapi/group/${groupId}/balance/${userId}`)
-		.then(res => res.json())
+		fetch(`/draftapi/group/${groupId}/balance/${account.id}`, {
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': account.token
+			}
+		})
+		.then(response => response.json().then(result => ({response, result})))
 		.then(
-			(result) => {
-				setMembersData({loaded: true, members: result.members});
+			({response, result}) => {
+				console.log("Result", result)
+				console.log(response.status);
+				if (response.status === 401) {
+					setMembersData({loaded: false, error: "You don't have permission"});
+				} else if (response.status === 200) {
+					setMembersData({loaded: true, members: result.members});
+				} else {
+					setMembersData({loaded: false, error: "Error"});
+				}
 			},
 			// Note: it's important to handle errors here
 			// instead of a catch() block so that we don't swallow
 			// exceptions from actual bugs in components.
 			(error) => {
 				console.error(error);
+				setMembersData({loaded: false, error: "Error"});
 			}
 		)
-	}, [groupId, userId])
-	const members = !membersData.loaded ? "Loading..." : displayMembers(membersData.members);
+	}, [groupId, account])
+	let members;
+	if (membersData.loaded) {
+		members = displayMembers(membersData.members, account);
+	} else if (membersData.error) {
+		members = <span>{membersData.error}</span>
+	} else {
+		members = "Loading...";
+	}
 	return (
 		<div>
 			<h1>Member List</h1>
@@ -32,13 +52,13 @@ function MembersPage() {
 	);
 }
 
-function displayMembers(members) {
+function displayMembers(members, account) {
 	return (
 		<ul className="memberList">
 			{members.map(member => (
 				<li key={member.id} className="groupMember">
-					<div>{member.name}</div>
-					<div className="yourBalance">Your balance: <Balance bal={member.amount}/></div>
+					<div><User other={member} me={account}/></div>
+					<div className="yourBalance">Your balance: <Balance bal={member.balance}/></div>
 					<div><Link to="" className="button paybackBtn">Pay back</Link></div>
 				</li>
 			))}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './App.css';
 import {
 	BrowserRouter as Router,
@@ -14,6 +14,7 @@ import MembersPage from './pages/MembersPage';
 import ExpensesPage from './pages/ExpensesPage';
 
 function App() {
+	const [account, setAccount] = useState({name:"Person 1", id: "5f0749c0b051362368853541", token: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmMDc0OWMwYjA1MTM2MjM2ODg1MzU0MSIsIm5hbWUiOiJQZXJzb24gMSIsImlhdCI6MTU5NDQwNTY5OCwiZXhwIjoxNjI1OTYyNjI0fQ.tJier201g01rmMQjwZFaWNF03M0-1eubJ4_fyAGU9Gg"})
 	return (
 		<Router>
 			<Switch>
@@ -24,13 +25,13 @@ function App() {
 						<RegisterPage/>
 					</Route>
 					<Route exact path="/groups">
-						<GroupsPage userId="whatever"/>
+						<GroupsPage account={account}/>
 					</Route>
 					<Route exact path="/group/:groupId/members">
-						<MembersPage/>
+						<MembersPage account={account}/>
 					</Route>
 					<Route exact path="/group/:groupId/expenses">
-						<ExpensesPage/>
+						<ExpensesPage account={account}/>
 					</Route>
 					<Route exact path="/">
 						<Link to="/groups">View your groups</Link>
