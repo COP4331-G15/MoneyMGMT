@@ -33,6 +33,12 @@ mongoose
 
 
 
+app.use('/draftapi/', require('./routes/api/draftapi.js'));
+
+// Temporary endpoints that spit out hardcoded sample data. Used for some simple testing while
+// the real API comes together
+// This can be deleted as soon as the frontend is updated
+app.use('/fakeapi/', require('./routes/api/fakeapi.js'));
 
 // React
 app.use(express.static(path.join(__dirname, 'frontend/build')));

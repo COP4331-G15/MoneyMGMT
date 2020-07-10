@@ -1,0 +1,232 @@
+const router = require('express').Router();
+const passport = require('passport');
+const mongoose = require("mongoose");
+const {ObjectID} = require('mongodb');
+router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
+    // Check that the user is authorized
+    if (req.body.userId !== req.user._id.toString()) {
+        res.json({error:"No access"});
+        return;
+    }
+    const userId = req.user._id;
+    const groupId = new ObjectID(req.params.groupId);
+
+    // Check the inviteCode for the given groupId and add the user to the list of members
+    mongoose.connection.collection("groups").updateOne(
+        { inviteCode: req.params.inviteCode, _id: groupId},
+        { $addToSet: { members: userId } }
+    ).then((result) => {
+        if (result.matchedCount === 0) {
+            res.json({error: "Invalid invitation"});
+        } else if (result.matchedCount === 1 && result.modifiedCount !== 1) {
+            res.json({error: "You are already a member of that group"});
+        }else {
+            res.json({success: true});
+        }
+    });
+});
+
+router.post('/user/:userId/createGroup', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
+    // TODO: improve
+    if (req.params.userId !== req.user._id.toString()) {
+        res.json({error:"No access"});
+        console.log(req.params.userId +" !== "+req.user._id);
+        return;
+    }
+
+    const groupDoc = {
+        name: req.body.name,
+        // TODO
+        inviteCode: "totallyrandomcode",
+        members: [new ObjectID(req.params.userId)],
+    };
+    // Insert the group
+    mongoose.connection.collection("groups").insertOne(groupDoc)
+    .then((result) => {
+        res.json({success: true, groupId: groupDoc._id});
+    });
+});
+router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
+    // TODO: improve
+    if (req.params.userId !== req.user._id.toString()) {
+        res.json({error:"No access"});
+        console.log(req.params.userId +" !== "+req.user._id);
+        return;
+    }
+    const userId = req.user._id;
+
+    // TODO: improvements
+    const groups = mongoose.connection.collection("groups").aggregate(
+    [
+        {
+            "$lookup": {
+                "from": "balances",
+                "let": {
+                    fGroupId: "$_id",
+                },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    {$eq: ["$groupId", "$$fGroupId"]},
+                                    {$eq: ["$userId", userId]}
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "as": "balance"
+            }
+        },
+        {
+            "$project": {
+                "total": { "$sum": "$balance.total" }
+            }
+        }
+    ]).toArray();
+    groups.then((result) => {
+        const returnedGroups = result.map(e => {
+            return {name: e.name, id: e._id.toString(), balance: e.total};
+        })
+        res.json({groups: returnedGroups});
+    });
+});
+
+router.get('/group/:groupId/balance/:userId', (req, res, next) => {
+    const {groupId, userId} = req.params;
+
+
+    const users = mongoose.connection.collection("groups").aggregate(
+    [
+        {
+            $match: {_id: new ObjectID(groupId)}
+        },
+        
+        {
+            "$lookup": {
+                "from": "users",
+                localField: "members",
+                foreignField: "_id",
+                as: "members",
+            }
+        },
+        {$unwind: "$members"},
+        {
+            $lookup: {
+                from: "balances",
+                "let": {
+                    otherUser: "$members._id",
+                },
+                as: "balance",
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    {$eq: ["$userId", new ObjectID(userId)]},
+                                    {$eq: ["$other","$$otherUser"]}
+                                ]
+                            }
+                        }
+                    }
+                ],
+            }
+        }
+    ]).toArray();
+    users.then((result) => {
+        
+        const returnedMembers = result.map(e => {
+            console.log(e)
+            return {name: e.members.name, id: e._id.toString(), balance: e.balance.length < 1 ? 0 : e.balance[0].total};
+        })
+        res.json({members: returnedMembers});
+    });
+});
+
+router.get('/group/:groupId/expenses', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
+    const {groupId} = req.params;
+    const result = await mongoose.connection.collection("groups").findOne( { members: req.user._id, _id: new ObjectID(groupId)} );
+    if (result == null) {
+        res.json({error: "Invalid"});
+        return;
+    }
+    const expenses = await mongoose.connection.collection("expenses").aggregate([
+        {
+            $match: {groupId: new ObjectID(groupId)}
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                localField: "payer",
+                foreignField: "_id",
+                as: "payer",
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                localField: "billed",
+                foreignField: "_id",
+                as: "billed",
+            }
+        },
+    ])
+    .sort({time: -1})
+    .toArray();
+    const returnedExpenses = expenses.map(expense => {
+        return {
+            description: expense.description,
+            groupId: expense.groupId,
+            payer: {name: expense.payer[0].name, id: expense.payer[0]._id},
+            billed: {name: expense.billed[0].name, id: expense.billed[0]._id},
+            amount: expense.amount,
+            time: expense.time
+        };
+    });
+    res.json({expenses: returnedExpenses});
+});
+
+router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
+     // TODO: improve
+    if (req.body.payer !== req.user._id.toString()) {
+        res.json({error:"No access"});
+        console.log(req.params.userId +" !== "+req.user._id);
+        return;
+    }
+    const userId = req.user._id;
+    const groupIdStr = req.params.groupId;
+    const {description, participatingMembers, totalAmount} = req.body;
+    console.log("Splitting "+totalAmount+" among the following members of group " + groupIdStr+": " + participatingMembers);
+
+    const billed = participatingMembers.map(e => new ObjectID(e));
+    const groupId = new ObjectID(groupIdStr);
+    const result = await mongoose.connection.collection("groups").findOne( { members: { $all: billed }, _id:groupId} );
+    if (result == null) {
+        res.json({error: "Invalid"});
+        return;
+    }
+    const splitCost = totalAmount / billed.length;
+    // TODO
+    mongoose.connection.collection("balances").updateOne(
+        {groupId: groupId, userId: userId, other: {$in: billed}},
+        {$inc: {total: splitCost}},
+        {upsert: true}
+    );
+    // In the instant between these two statements, you may owe yourself money. It's probably not worth fixing
+    mongoose.connection.collection("balances").updateOne(
+        {groupId: groupId, userId: {$in: billed}, other: userId},
+        {$inc: {total: -splitCost}},
+        {upsert: true}
+    );
+
+    const docs = billed.filter(e => e !== req.body.payer).map(billedUser => {
+        return {description: description, groupId: groupId, payer: userId, billed: billedUser, amount: splitCost, time: new Date()};
+    });
+    mongoose.connection.collection("expenses").insertMany(docs);
+    console.log(result);
+
+    res.json({success: true});
+});
+
+module.exports = router;
