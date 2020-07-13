@@ -40,11 +40,11 @@ mongoose
 // This can be deleted as soon as the frontend is updated
 //app.use('/fakeapi/', require('./routes/api/fakeapi.js'));
 
-// React
-//app.use(express.static(path.join(__dirname, 'frontend/build')));
-//app.get('*', (req, res) => {
-	//res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
-//});
+React
+app.use(express.static(path.join(__dirname, 'frontend/build')));
+app.get('*', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
+});
 
 
 
