@@ -1,3 +1,6 @@
+// https://redux.js.org/api/createstore/
+
+
 import { createStore, applyMiddleware, compose } from "redux";
 import thunk from "redux-thunk";
 
