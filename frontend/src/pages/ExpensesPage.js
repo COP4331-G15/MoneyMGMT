@@ -1,8 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import {useParams} from "react-router-dom";
 import User from '../components/User';
+import useDarkMode from '../components/UseDarkMode';
 
 function ExpensesPage({account}) {
+	useDarkMode();
+
 	let { groupId } = useParams();
 	const [expenseData, setExpenseData] = useState({loaded: false});
 	useEffect(() => {
@@ -20,7 +23,7 @@ function ExpensesPage({account}) {
 				if (response.status === 401) {
 					setExpenseData({loaded: false, error: "You don't have permission"});
 				} else if (response.status === 200) {
-					setExpenseData({loaded: true, expenses: result.expenses});
+					setExpenseData({loaded: true, expenses: result.expenses, group: result.group});
 				} else {
 					setExpenseData({loaded: false, error: "Error"});
 				}
@@ -44,7 +47,7 @@ function ExpensesPage({account}) {
 		expenses = "Loading...";
 	}
 	return (<div>
-		<h1>&lt;Insert group name&gt; Expense Log</h1>
+		<h1>{!expenseData.group ? null : expenseData.group.name} Expense Log</h1>
 		{expenses}
 		</div>);
 }

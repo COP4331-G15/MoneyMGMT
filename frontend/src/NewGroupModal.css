@@ -1,4 +1,4 @@
-.modal-content {
+.meridian-modal-content {
 	position: relative;
 	background-color: #fefefe;
 	margin: auto;
@@ -10,28 +10,28 @@
 	height: 500px;
 	max-height: 100%;
 	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-	animation-name: animatetop;
+	animation-name: meridian-animatetop;
 	animation-duration: 0.4s
 }
 
-@keyframes animatetop {
+@keyframes meridian-animatetop {
 	from {top: -300px; opacity: 0}
 	to {top: 0; opacity: 1}
 }
-.modalHeader {
+.meridian-modalHeader {
 	float: left;
 	width: 100%;
 	border-bottom: 2px solid black;
 	margin-bottom: 10px;
 }
 
-.modalTitle {
+.meridian-modalTitle {
 	display: inline;
 }
 
 
 
-.modal {
+.meridian-modal {
 	position: fixed; /* Stay in place */
 	z-index: 1; /* Sit on top */
 	left: 0;
@@ -44,6 +44,6 @@
 	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
-.closeBtn {
+.meridian-closeBtn {
 	float: right;
 }

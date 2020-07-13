@@ -6,11 +6,11 @@ function NewGroupModal({onCancel, account, onNewGroup}) {
 	const [isSaving, setIsSaving] = useState(false);
 	const [message, setMessage] = useState();
 	return (
-		<div className="modal">
-		<div className="modal-content">
-			<div className="modalHeader">
-				<h1 className="modalTitle">Add group</h1>
-			<button className="button closeBtn" disabled={isSaving} onClick={() => {
+		<div className="meridian-modal">
+		<div className="meridian-modal-content">
+			<div className="meridian-modalHeader">
+				<h1 className="meridian-modalTitle">Add group</h1>
+			<button className="meridian-button meridian-closeBtn" disabled={isSaving} onClick={() => {
 				onCancel()}}>Close</button>
 			</div>
 				<div>
@@ -23,7 +23,7 @@ function NewGroupModal({onCancel, account, onNewGroup}) {
 					<div>
 						{message}
 					</div>
-					<div><button disabled={isSaving} className="button" onClick={() => {
+					<div><button disabled={isSaving} className="meridian-button" onClick={() => {
 						setIsSaving(true);
 						setMessage("Saving...");
 						fetch(`/draftapi/user/${account.id}/createGroup`, {

@@ -2,10 +2,14 @@ import React, {useState, useEffect} from 'react';
 import Balance from '../components/Balance';
 import NewGroupModal from '../components/NewGroupModal';
 import {Link} from 'react-router-dom';
+import useDarkMode from '../components/UseDarkMode';
 
 function GroupsPage({account}) {
+	useDarkMode();
+
 	const [groupsData, setGroupsData] = useState({loaded: false});
 	const [modalActive, setModalActive] = useState(false);
+
 	useEffect(() => {
 		fetch(`/draftapi/user/${account.id}/groups`, {
 			headers: {
@@ -47,7 +51,7 @@ function GroupsPage({account}) {
 		<div>
 			<h1>Your groups:</h1>
 			<div>
-				<button className="button newGroupBtn" onClick={() => {setModalActive(true)}}>New group</button>
+				<button className="meridian-button newGroupBtn" onClick={() => {setModalActive(true)}}>New group</button>
 			</div>
 			<div>
 				{groups}
@@ -74,8 +78,8 @@ function displayGroups(groups) {
 					{/*<div className="groupTotalExpenses">Total expenses: ${group.totalExpenses}</div>*/}
 					<div className="groupUserBalance">Your balance: <Balance bal={group.balance}/></div>
 					<div>
-						<Link to={`/group/${group.id}/members`} className="button group__viewmembers">View members</Link>
-						<Link to={`/group/${group.id}/expenses`} className="button group__viewexpenses">View expense log</Link>
+						<Link to={`/group/${group.id}/members`} className="meridian-button group__viewmembers">View members</Link>
+						<Link to={`/group/${group.id}/expenses`} className="meridian-button group__viewexpenses">View expense log</Link>
 					</div>
 				</li>
 			))}

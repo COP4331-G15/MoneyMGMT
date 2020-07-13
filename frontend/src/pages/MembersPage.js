@@ -2,8 +2,11 @@ import React, {useState, useEffect} from 'react';
 import Balance from '../components/Balance';
 import {Link, useParams} from "react-router-dom";
 import User from '../components/User';
+import useDarkMode from '../components/UseDarkMode';
 
 function MembersPage({account}) {
+	useDarkMode();
+
 	let { groupId } = useParams();
 	const [membersData, setMembersData] = useState({loaded: false});
 	useEffect(() => {
@@ -59,7 +62,7 @@ function displayMembers(members, account) {
 				<li key={member.id} className="groupMember">
 					<div><User other={member} me={account}/></div>
 					<div className="yourBalance">Your balance: <Balance bal={member.balance}/></div>
-					<div><Link to="" className="button paybackBtn">Pay back</Link></div>
+					<div><Link to="" className="meridian-button paybackBtn">Pay back</Link></div>
 				</li>
 			))}
 		</ul>

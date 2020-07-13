@@ -194,14 +194,13 @@ router.get('/group/:groupId/expenses', passport.authenticate('jwt', { session: f
     const returnedExpenses = expenses.map(expense => {
         return {
             description: expense.description,
-            groupId: expense.groupId,
             payer: {name: expense.payer[0].name, id: expense.payer[0]._id},
             billed: {name: expense.billed[0].name, id: expense.billed[0]._id},
             amount: expense.amount,
             time: expense.time
         };
     });
-    res.json({expenses: returnedExpenses});
+    res.json({expenses: returnedExpenses, group: {groupId: groupId, name: result.name}});
 });
 
 router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { session: false }), async (req, res, next) => {

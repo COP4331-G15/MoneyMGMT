@@ -3,7 +3,7 @@
 	width: max-content;
 	min-width: 30%;
 }
-body {
+body.dark {
 	background-color: #1B1921;
 	color: white;
 	font-family: sans-serif;
@@ -35,7 +35,7 @@ body {
 
 }
 
-.button {
+.meridian-button {
 	font-size: medium;
 	border: 2px solid black;
 	margin: 5px;
@@ -46,11 +46,11 @@ body {
 	display: inline-block;
 }
 
-.button[disabled] {
+.meridian-button[disabled] {
 	background-color: lightgray;
 	color: darkslategray;
 }
 
-.button:not([disabled]):hover {
+.meridian-button:not([disabled]):hover {
 	background-color: darkgray;
 }
