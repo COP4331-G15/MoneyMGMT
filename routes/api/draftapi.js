@@ -2,6 +2,21 @@ const router = require('express').Router();
 const passport = require('passport');
 const mongoose = require("mongoose");
 const {ObjectID} = require('mongodb');
+
+router.get('/group/:groupId/checkInvite/:inviteCode', passport.authenticate('jwt', { session: false }),  async (req, res, next) => {
+    const userId = req.user._id;
+    const groupId = new ObjectID(req.params.groupId);
+
+    // Check the inviteCode for the given groupId and add the user to the list of members
+    const result = await mongoose.connection.collection("groups").findOne({ inviteCode: req.params.inviteCode, _id: groupId});
+    if (result == null) {
+        res.status(401);
+        res.json({error: "Invalid invitation"});
+        return;
+    }
+    res.json({group: {name: result.name}})
+});
+
 router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
     // Check that the user is authorized
     if (req.body.userId !== req.user._id.toString()) {
@@ -19,9 +34,11 @@ router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { s
     ).then((result) => {
         if (result.matchedCount === 0) {
             res.json({error: "Invalid invitation"});
-        } else if (result.matchedCount === 1 && result.modifiedCount !== 1) {
+        }
+        /*else if (result.matchedCount === 1 && result.modifiedCount !== 1) {
             res.json({error: "You are already a member of that group"});
-        }else {
+        }*/
+        else {
             res.json({success: true});
         }
     });
@@ -62,6 +79,7 @@ router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false
     // TODO: improvements
     const groups = mongoose.connection.collection("groups").aggregate(
     [
+        { $match: {members: req.user._id}},
         {
             "$lookup": {
                 "from": "balances",
@@ -87,14 +105,15 @@ router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false
             "$project": {
                 "total": { "$sum": "$balance.total" },
                 "name": true,
-                lastActivity: "$lastActivity",
+                lastActivity: true,
+                inviteCode: true,
             }
         }
     ]).sort({lastActivity: -1}).toArray();
     groups.then((result) => {
         console.log(result);
         const returnedGroups = result.map(e => {
-            return {name: e.name, id: e._id.toString(), balance: e.total};
+            return {name: e.name, id: e._id.toString(), balance: e.total, lastActivity: e.lastActivity, inviteCode: e.inviteCode};
         })
         res.json({groups: returnedGroups});
     });
@@ -157,7 +176,7 @@ router.get('/group/:groupId/balance/:userId', passport.authenticate('jwt', { ses
             console.log(e)
             return {name: e.members.name, id: e.members._id.toString(), balance: e.balance.length < 1 ? 0 : e.balance[0].total};
         })
-        res.json({members: returnedMembers});
+        res.json({members: returnedMembers, group: {name: result[0].name, id: result[0]._id, inviteCode: result[0].inviteCode}});
     });
 });
 
@@ -165,6 +184,7 @@ router.get('/group/:groupId/expenses', passport.authenticate('jwt', { session: f
     const {groupId} = req.params;
     const result = await mongoose.connection.collection("groups").findOne( { members: req.user._id, _id: new ObjectID(groupId)} );
     if (result == null) {
+        res.status(401);
         res.json({error: "Invalid"});
         return;
     }

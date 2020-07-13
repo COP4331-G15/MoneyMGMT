@@ -9,6 +9,7 @@ import Login from "./components/auth/Login";
 import GroupsPage from './pages/GroupsPage';
 import MembersPage from './pages/MembersPage';
 import ExpensesPage from './pages/ExpensesPage';
+import JoinGroupPage from './pages/JoinGroupPage';
 
 import "./App.css";
 
@@ -32,6 +33,9 @@ class App extends Component {
 						</Route>
 						<Route exact path="/group/:groupId/expenses">
 							<ExpensesPage account={account}/>
+						</Route>
+						<Route exact path="/group/:groupId/join/:inviteCode">
+							<JoinGroupPage account={account}/>
 						</Route>
 						<Route>
 							404 Page Not Found

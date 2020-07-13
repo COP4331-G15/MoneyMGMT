@@ -3,6 +3,7 @@ import Balance from '../components/Balance';
 import {Link, useParams} from "react-router-dom";
 import User from '../components/User';
 import useDarkMode from '../components/UseDarkMode';
+import { copyFile } from 'fs';
 
 function MembersPage({account}) {
 	useDarkMode();
@@ -25,7 +26,7 @@ function MembersPage({account}) {
 				if (response.status === 401) {
 					setMembersData({loaded: false, error: "You don't have permission"});
 				} else if (response.status === 200) {
-					setMembersData({loaded: true, members: result.members});
+					setMembersData({loaded: true, members: result.members, group: result.group});
 				} else {
 					setMembersData({loaded: false, error: "Error"});
 				}
@@ -41,7 +42,7 @@ function MembersPage({account}) {
 	}, [groupId, account])
 	let members;
 	if (membersData.loaded) {
-		members = displayMembers(membersData.members, account);
+		members = displayMembers(membersData, account);
 	} else if (membersData.error) {
 		members = <span>{membersData.error}</span>
 	} else {
@@ -55,17 +56,35 @@ function MembersPage({account}) {
 	);
 }
 
-function displayMembers(members, account) {
+function displayMembers({members, group}, account) {
+	const inviteLink = `${window.origin}/group/${group.id}/join/${group.inviteCode}`;
 	return (
-		<ul className="memberList">
-			{members.map(member => (
-				<li key={member.id} className="groupMember">
-					<div><User other={member} me={account}/></div>
-					<div className="yourBalance">Your balance: <Balance bal={member.balance}/></div>
-					<div><Link to="" className="meridian-button paybackBtn">Pay back</Link></div>
-				</li>
-			))}
-		</ul>
+		<div>
+			<div> 
+			Invite link
+				<input type="text" readonly className="meridian-button groupInviteLink" value={inviteLink}/>
+				<button className="meridian-button" data-position="bottom" data-tooltip="Link copied"
+				onClick={(e) => {
+					navigator.clipboard.writeText(inviteLink);
+					const instance = window.M.Tooltip.init(e.target);
+					instance.open();
+					e.target.onmouseleave = () => {instance.destroy()};
+				}}>
+					<i className="material-icons left">content_copy</i>
+					Copy link
+				</button>
+				
+			</div>
+			<ul className="memberList">
+				{members.map(member => (
+					<li key={member.id} className="groupMember">
+						<div><User other={member} me={account}/></div>
+						<div className="yourBalance">Your balance: <Balance bal={member.balance}/></div>
+						<div><Link to="" className="meridian-button paybackBtn">Pay back</Link></div>
+					</li>
+				))}
+			</ul>
+		</div>
 	);
 }
 

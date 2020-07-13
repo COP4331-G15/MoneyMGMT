@@ -8,6 +8,15 @@ body.dark {
 	color: white;
 	font-family: sans-serif;
 }
+input[type="text"].groupInviteLink {
+	width: 10em;
+	line-height: 1.15;
+	color: black;
+	border-bottom: 4px solid #009387;
+	margin-left: 1em;
+	background-color: gray;
+	background-color: white;
+}
 .groupEntry, .groupMember, .expense {
 	padding: 15px 10px;
 	border-radius: 2px;
@@ -36,6 +45,7 @@ body.dark {
 }
 
 .meridian-button {
+	line-height: 1.15;
 	font-size: medium;
 	border: 2px solid black;
 	margin: 5px;
