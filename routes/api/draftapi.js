@@ -5,6 +5,7 @@ const {ObjectID} = require('mongodb');
 router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
     // Check that the user is authorized
     if (req.body.userId !== req.user._id.toString()) {
+        res.status(401);
         res.json({error:"No access"});
         return;
     }
@@ -14,7 +15,7 @@ router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { s
     // Check the inviteCode for the given groupId and add the user to the list of members
     mongoose.connection.collection("groups").updateOne(
         { inviteCode: req.params.inviteCode, _id: groupId},
-        { $addToSet: { members: userId } }
+        { $addToSet: { members: userId }, $max: {lastActivity: new Date()} }
     ).then((result) => {
         if (result.matchedCount === 0) {
             res.json({error: "Invalid invitation"});
@@ -29,6 +30,7 @@ router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { s
 router.post('/user/:userId/createGroup', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
     // TODO: improve
     if (req.params.userId !== req.user._id.toString()) {
+        res.status(401);
         res.json({error:"No access"});
         console.log(req.params.userId +" !== "+req.user._id);
         return;
@@ -38,17 +40,19 @@ router.post('/user/:userId/createGroup', passport.authenticate('jwt', { session:
         name: req.body.name,
         // TODO
         inviteCode: "totallyrandomcode",
+        lastActivity: new Date(),
         members: [new ObjectID(req.params.userId)],
     };
     // Insert the group
     mongoose.connection.collection("groups").insertOne(groupDoc)
     .then((result) => {
-        res.json({success: true, groupId: groupDoc._id});
+        res.json({success: true, group: {id: groupDoc._id, name: groupDoc.name, balance: 0, lastActivity: groupDoc.lastActivity}});
     });
 });
 router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
     // TODO: improve
     if (req.params.userId !== req.user._id.toString()) {
+        res.status(401);
         res.json({error:"No access"});
         console.log(req.params.userId +" !== "+req.user._id);
         return;
@@ -82,10 +86,11 @@ router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false
         {
             "$project": {
                 "total": { "$sum": "$balance.total" },
-                "name": true
+                "name": true,
+                lastActivity: "$lastActivity",
             }
         }
-    ]).toArray();
+    ]).sort({lastActivity: -1}).toArray();
     groups.then((result) => {
         console.log(result);
         const returnedGroups = result.map(e => {
@@ -202,6 +207,7 @@ router.get('/group/:groupId/expenses', passport.authenticate('jwt', { session: f
 router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
      // TODO: improve
     if (req.body.payer !== req.user._id.toString()) {
+        res.status(401);
         res.json({error:"No access"});
         console.log(req.params.userId +" !== "+req.user._id);
         return;
@@ -231,7 +237,10 @@ router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { sess
         {$inc: {total: -splitCost}},
         {upsert: true}
     );
-
+    mongoose.connection.collection("groups").updateOne(
+        { _id: groupId},
+        { $max: {lastActivity: new Date()} }
+    );
     const docs = billed.filter(e => e !== req.body.payer).map(billedUser => {
         return {description: description, groupId: groupId, payer: userId, billed: billedUser, amount: splitCost, time: new Date()};
     });

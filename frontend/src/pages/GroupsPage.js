@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import Balance from '../components/Balance';
+import NewGroupModal from '../components/NewGroupModal';
 import {Link} from 'react-router-dom';
 
 function GroupsPage({account}) {
 	const [groupsData, setGroupsData] = useState({loaded: false});
+	const [modalActive, setModalActive] = useState(false);
 	useEffect(() => {
 		fetch(`/draftapi/user/${account.id}/groups`, {
 			headers: {
@@ -45,11 +47,20 @@ function GroupsPage({account}) {
 		<div>
 			<h1>Your groups:</h1>
 			<div>
-				<button className="button newGroupBtn">New group</button>
+				<button className="button newGroupBtn" onClick={() => {setModalActive(true)}}>New group</button>
 			</div>
 			<div>
 				{groups}
 			</div>
+			{modalActive ? <NewGroupModal account={account} onCancel={() => {
+				setModalActive(false);}}
+				onNewGroup={(group) => {
+					setModalActive(false);
+					setGroupsData(groupsData => {
+						return {loaded: true, groups: [group, ...groupsData.groups]};
+					});
+				}}
+			/> : null}
 		</div>
 	);
 }

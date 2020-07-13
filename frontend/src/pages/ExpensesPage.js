@@ -54,7 +54,7 @@ function displayExpenses(expenses, account) {
 		<ul className="expenseList">
 			{expenses.map(expense => (
 				<li key={expense.id} className="expense">
-					<div><User other={expense.billed} me={account}/> paid for <User other={expense.payer} me={account}/></div>
+					<div><User other={expense.payer} me={account}/> paid for <User other={expense.billed} me={account}/></div>
 					<div>${expense.amount}</div>
 					<div>Description: {expense.description}</div>
 				</li>

@@ -3,20 +3,31 @@
 	width: max-content;
 	min-width: 30%;
 }
-
+body {
+	background-color: #1B1921;
+	color: white;
+	font-family: sans-serif;
+}
 .groupEntry, .groupMember, .expense {
+	padding: 15px 10px;
+	border-radius: 2px;
+	background-color: #1B1921;
+	border: 2px solid #009387;	
+	margin-bottom: 10px;
+}
+/*.groupEntry, .groupMember, .expense {
 	padding: 10px;
 	display: block;
 	border: 2px solid black;
 	margin-bottom: 10px;
-}
+}*/
 
 .balancePositive {
-	color: green;
+	color: #23EC89;
 }
 
 .balanceNegative {
-	color: red;
+	color: #FF1DA2;
 }
 
 .group__viewmembers {
@@ -25,15 +36,21 @@
 }
 
 .button {
+	font-size: medium;
 	border: 2px solid black;
 	margin: 5px;
 	padding: 5px;
-	background-color: lightgray;
-	color: black;
+	background-color: #009387;
+	color: white;
 	text-decoration: none;
 	display: inline-block;
 }
 
-.button:hover {
+.button[disabled] {
+	background-color: lightgray;
+	color: darkslategray;
+}
+
+.button:not([disabled]):hover {
 	background-color: darkgray;
 }
