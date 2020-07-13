@@ -6,7 +6,6 @@ const express = require( "express" );
 const mongoose = require("mongoose");
 const bodyParser = require( "body-parser" );
 const passport = require( "passport" );
-
 const users = require( "./routes/api/users" );
 
 const app = express();
@@ -17,10 +16,10 @@ app.use(
 		extended: false
 	})
 );
-app.use( bodyParser.json() );
+app.use(bodyParser.json());
 
 // NEW db config
-const db = require( "./config/keys" ).mongoURI;
+const db = require("./config/keys").mongoURI;
 
 // NEW connect to MongoDB
 mongoose
@@ -28,10 +27,8 @@ mongoose
 		db,
 		{ useNewUrlParser: true, useUnifiedTopology: true }
 	)
-	.then( () => console.log( "MongoDB successfully connected" ) )
-	.catch( err => console.log(err) );
-
-
+	.then( () => console.log("MongoDB successfully connected") )
+	.catch(err => console.log(err));
 
 app.use('/draftapi/', require('./routes/api/draftapi.js'));
 
@@ -41,20 +38,14 @@ app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
 });
 
-
-
-
-
-
-
 // passport Middleware
-app.use( passport.initialize() );
+app.use(passport.initialize());
 
 // passport configuration
-require( "./config/passport" )( passport );
+require("./config/passport")(passport);
 
 // Routes
-app.use( "/routes/api/users", users );
+app.use("/routes/api/users", users);
 
 const port = process.env.PORT || 8001;
-app.listen( port, () => console.log( `Server up and running on port ${port} !` ) );
+app.listen(port, () => console.log(`Server up and running on port ${port} !`) );

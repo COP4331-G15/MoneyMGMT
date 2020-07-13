@@ -2,35 +2,34 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
 class Login extends Component {
-    constructor() {
-        super();
-        this.state = {
-            email: "",
-            password: "",
-            errors: {}
-        };
-    }
-
-    onChange = e => {
-        this.setState({ [e.target.id]: e.target.value });
-    };
-
-    onSubmit = e => {
-        e.preventDefault();
-    
-    
-    const userData = {
-        email: this.state.email,
-        password: this.state.passwords
+   constructor() {
+      super();
+      this.state = {
+         email: "",
+         password: "",
+         errors: {}
       };
-  
-    console.log(userData);
-    };
+   }
 
-    render() {
-        const { errors } = this.state;
+   onChange = e => {
+      this.setState({ [e.target.id]: e.target.value });
+   };
 
-        return (
+   onSubmit = e => {
+      e.preventDefault();
+
+      const userData = {
+         email: this.state.email,
+         password: this.state.passwords
+      };
+
+      console.log(userData);
+   };
+
+   render() {
+      const { errors } = this.state;
+
+      return (
             <div className="container">
         <div style={{ marginTop: "4rem" }} className="row">
           <div className="col s8 offset-s2">
@@ -85,11 +84,8 @@ class Login extends Component {
           </div>
         </div>
       </div>
-    );
-  }
+      );
+   }
 }
+
 export default Login;
-        
-    
-
-
