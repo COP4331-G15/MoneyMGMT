@@ -39,9 +39,6 @@ export default function(state = initState, action)
                 loading: true
             };
         default:
-            return
-            {
-                state;
-            }
+            return state
     }
 }
