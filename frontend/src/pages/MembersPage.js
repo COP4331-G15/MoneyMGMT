@@ -3,7 +3,6 @@ import Balance from '../components/Balance';
 import {Link, useParams} from "react-router-dom";
 import User from '../components/User';
 import useDarkMode from '../components/UseDarkMode';
-import { copyFile } from 'fs';
 
 function MembersPage({account}) {
 	useDarkMode();

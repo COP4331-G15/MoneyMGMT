@@ -20,10 +20,10 @@ const { ExtractJwt } = require("passport-jwt");
 // @access Public
 router.post("/register", (req, res) => {
    // Form Validation
-   const { errors, isValid } = validateRegisterInput(req.body);
+   const { errors, isValid } = validateRegInput(req.body);
 
    // Check validation
-   if (isValid) {
+   if (!isValid) {
       return res.status(400).json(errors);
    }
    User.findOne({ email: req.body.email }).then(user => {
@@ -93,7 +93,9 @@ router.post("/login", (req, res) => {
                (err, token) => {
                   res.json({
                      success: true,
-                     token: "Bearer " + token
+                     token: "Bearer " + token,
+                     email: user.email,
+                     date: user.date
                   });
                }
             );
@@ -107,7 +109,7 @@ router.post("/login", (req, res) => {
    });
 });
 
-// @route POST api/users/logout
+/*// @route POST api/users/logout
 // @desc Logout user
 // @access Public
 app.get('/logout', (req, res, next) => {
@@ -137,6 +139,6 @@ app.get('/logout', (req, res, next) => {
          message: 'Good'
       });
    });
-});
+});*/
 
 module.exports = router;
