@@ -1,13 +1,12 @@
-// defining root reducer
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+//import * as serviceWorker from './serviceWorker';
 
-import { combineReducers } from "redux";
-import authReducer from "./authReducer";
-import errorReducer from "./errorReducer";
+ReactDOM.render(<App />, document.getElementById('root'));
 
-export default combineReducers(
-  {
-    auth: authReducer,
-    errors: errorReducer
-  }
-);
-
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: http://bit.ly/CRA-PWA
+//serviceWorker.unregister();

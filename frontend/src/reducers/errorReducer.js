@@ -1,5 +1,4 @@
 import { GET_ERRORS } from "../actions/types";
-import { deflate } from "zlib";
 
 const initState = {};
 

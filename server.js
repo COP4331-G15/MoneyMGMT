@@ -1,7 +1,7 @@
 //require( 'dotenv' ).config();
 //require( './server/db-conn' );
 
-const path = require( "path" );
+//const path = require( "path" );
 const express = require( "express" );
 const mongoose = require("mongoose");
 const bodyParser = require( "body-parser" );
@@ -40,26 +40,26 @@ mongoose
 // This can be deleted as soon as the frontend is updated
 //app.use('/fakeapi/', require('./routes/api/fakeapi.js'));
 
-React
+/*React
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
 });
 
+*/
 
 
 
 
 
-
-// passport Middleware
+// Passport Middleware
 app.use( passport.initialize() );
 
-// passport configuration
+// Passport configuration
 require( "./config/passport" )( passport );
 
 // Routes
-app.use( "/routes/api/users", users );
+app.use( "/api/users", users );
 
-const port = process.env.PORT || 8001;
+const port = process.env.PORT || 5000;
 app.listen( port, () => console.log( `Server up and running on port ${port} !` ) );
