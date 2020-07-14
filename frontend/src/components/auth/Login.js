@@ -33,7 +33,7 @@ class Login extends Component {
       if (nextProps.errors)
       {
         this.setState({
-          errors: nextProps.errorsd
+          errors: nextProps.errors
         });
       }
     }
@@ -48,10 +48,10 @@ class Login extends Component {
     
     const userData = {
         email: this.state.email,
-        password: this.state.passwords
+        password: this.state.password
       };
   
-   this.props.loginUser(userData);
+    this.props.loginUser(userData);
     };
     render() {
         const { errors } = this.state;
