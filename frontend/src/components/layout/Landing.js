@@ -9,7 +9,7 @@ class Landing extends Component {
                     <div className="col s12 center-align">
                         <h4>
                             <b>Begin</b> your expense management journey with{" "}
-                            <span style={{ fontFamily: "monospace" }}>MERIDIAN,</span>
+                            <span style={{ fontFamily: "monospace", fontSize: "larger" }}>MERIDIAN,</span>
                             your expense event tool
                         </h4>
                         <p className="flow-text grey-text text-darken-1">
