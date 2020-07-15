@@ -58,7 +58,7 @@
     bottom: 87px;
 }
 
-.groupNameInput {
+#groupNameInput, #groupDescriptionInput {
 	background-color: black;
     position: relative;
     bottom: 10px;

@@ -16,7 +16,7 @@ router.get('/group/:groupId/checkInvite/:inviteCode', passport.authenticate('jwt
       return;
    }
    
-   res.json({group: {name: result.name}})
+   res.json({group: {name: result.name, description: result.description || ""}})
 });
 
 router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
@@ -58,6 +58,7 @@ router.post('/user/:userId/createGroup', passport.authenticate('jwt', { session:
 
    const groupDoc = {
       name: req.body.name,
+      description: req.body.description || "",
       // TODO
       inviteCode: "totallyrandomcode",
       lastActivity: new Date(),
@@ -67,7 +68,13 @@ router.post('/user/:userId/createGroup', passport.authenticate('jwt', { session:
    // Insert the group
    mongoose.connection.collection("groups").insertOne(groupDoc)
    .then((result) => {
-      res.json({success: true, group: {id: groupDoc._id, name: groupDoc.name, balance: 0, lastActivity: groupDoc.lastActivity}});
+      res.json({success: true, group: {
+         id: groupDoc._id,
+         name: groupDoc.name,
+         description: groupDoc.description,
+         balance: 0,
+         lastActivity: groupDoc.lastActivity
+      }});
    });
 });
 router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
@@ -112,6 +119,7 @@ router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false
          "$project": {
             "total": { "$sum": "$balance.total" },
             "name": true,
+            "description": true,
             lastActivity: true,
             inviteCode: true,
          }
@@ -121,7 +129,14 @@ router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false
    groups.then((result) => {
       console.log(result);
       const returnedGroups = result.map(e => {
-         return {name: e.name, id: e._id.toString(), balance: e.total, lastActivity: e.lastActivity, inviteCode: e.inviteCode};
+         return {
+            name: e.name,
+            id: e._id.toString(),
+            description: e.description || "",
+            balance: e.total,
+            lastActivity: e.lastActivity,
+            inviteCode: e.inviteCode
+         };
       })
 
       res.json({groups: returnedGroups});

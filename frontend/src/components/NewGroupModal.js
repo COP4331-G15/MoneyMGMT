@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import "../NewGroupModal.css";
 
 function NewGroupModal({onCancel, account, onNewGroup}) {
-	const [groupName, setGroupName] = useState();
+	const [groupName, setGroupName] = useState("");
+	const [groupDescription, setGroupDescription] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
 	const [message, setMessage] = useState();
 	return (
@@ -18,7 +19,8 @@ function NewGroupModal({onCancel, account, onNewGroup}) {
 						{/* <div>
 						Group name
 						</div> */}
-					<input  className = 'groupNameInput' placeholder = 'Group name here' type="text" disabled={isSaving} autoFocus value={groupName || ''} onChange={(e) => {setGroupName(e.target.value)}}/>
+					<input  id = 'groupNameInput' placeholder = 'Group name here' type="text" disabled={isSaving} autoFocus value={groupName} onChange={(e) => {setGroupName(e.target.value)}}/>
+					<input  id = 'groupDescriptionInput' placeholder = 'Group description here' type="text" disabled={isSaving} value={groupDescription} onChange={(e) => {setGroupDescription(e.target.value)}}/>
 					</label>
 					<div>
 						{message}
@@ -28,7 +30,7 @@ function NewGroupModal({onCancel, account, onNewGroup}) {
 						setMessage("Saving...");
 						fetch(`/draftapi/user/${account.id}/createGroup`, {
 							method: 'POST',
-							body: JSON.stringify({name: groupName}),
+							body: JSON.stringify({name: groupName, description: groupDescription}),
 							headers: {
 								'Content-Type': 'application/json',
 								'Authorization': account.token

@@ -81,6 +81,7 @@ function displayGroups(groups) {
 			{groups.map(group => (
 				<li style = { {textAlign: 'center', backgroundColor: 'black'} }key={group.id} className="groupEntry">
 					<h5 style={{ marginTop: "0px", fontWeight: 'bold' }}>Name: {group.name}</h5>
+					Description: {group.description}
 					{/*<div className="groupTotalExpenses">Total expenses: ${group.totalExpenses}</div>*/}
 					<div className="groupUserBalance">Your balance: <Balance bal={group.balance}/></div>
 					<div /*style = { {position: "absolute", left: "300px"} }*/>
