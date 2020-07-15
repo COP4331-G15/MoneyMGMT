@@ -20,10 +20,10 @@ const { ExtractJwt } = require("passport-jwt");
 // @access Public
 router.post("/register", (req, res) => {
    // Form Validation
-   const { errors, isValid } = validateRegisterInput(req.body);
+   const { errors, isValid } = validateRegInput(req.body);
 
    // Check validation
-   if (isValid) {
+   if (!isValid) {
       return res.status(400).json(errors);
    }
    User.findOne({ email: req.body.email }).then(user => {
@@ -93,7 +93,9 @@ router.post("/login", (req, res) => {
                (err, token) => {
                   res.json({
                      success: true,
-                     token: "Bearer " + token
+                     token: "Bearer " + token,
+                     email: user.email,
+                     date: user.date
                   });
                }
             );
@@ -107,7 +109,7 @@ router.post("/login", (req, res) => {
    });
 });
 
-// @route POST api/users/logout
+/*// @route POST api/users/logout
 // @desc Logout user
 // @access Public
 // app.get('/logout', (req, res, next) => {
@@ -116,6 +118,7 @@ router.post("/login", (req, res) => {
 //    const { token } = query;
 //    // ?token=test
    
+<<<<<<< HEAD
 //    // Verify the token is one of a kind and it's not deleted.
 //    UserSession.findOneAndUpdate({
 //       _id: token,
@@ -138,5 +141,29 @@ router.post("/login", (req, res) => {
 //       });
 //    });
 // });
+=======
+   // Verify the token is one of a kind and it's not deleted.
+   UserSession.findOneAndUpdate({
+      _id: token,
+      isDeleted: false
+   }, {
+      $set: {
+         isDeleted:true
+      }
+   }, null, (err, sessions) => {
+      if (err) {
+         console.log(err);
+         return res.send({
+            success: false,
+            message: 'Error: Server error'
+         });
+      }
+      return res.send({
+         success: true,
+         message: 'Good'
+      });
+   });
+});*/
+>>>>>>> 8085737ce339668ba82d6c308c6abd0c2d5392e0
 
 module.exports = router;
