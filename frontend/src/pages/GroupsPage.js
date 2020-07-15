@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import Balance from '../components/Balance';
 import NewGroupModal from '../components/NewGroupModal';
 import {Link} from 'react-router-dom';
+import { connect } from "react-redux";
 import useDarkMode from '../components/UseDarkMode';
 
 function GroupsPage({account}) {
@@ -92,4 +93,8 @@ function displayGroups(groups) {
 	);
 }
 
-export default GroupsPage;
+const mapStateToProps = state => ({
+    account: state.auth.user
+});
+
+export default connect(mapStateToProps)(GroupsPage);

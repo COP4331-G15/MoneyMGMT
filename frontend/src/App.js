@@ -33,6 +33,7 @@ if (localStorage.jwtToken)
 	setAuthToken(token);
 	// Decode token and get User's info and expiration
 	const decoded = jwt_decode(token);
+	Object.assign(decoded, {token: token});
 	// Set user and isAuth
 	store.dispatch(setCurrentUser(decoded));
 
@@ -49,8 +50,6 @@ if (localStorage.jwtToken)
 
 class App extends Component {
 	render() {
-		// TODO: Replace this with pulling the real user data from the Redux store
-		const account = {name:"Person 1", id: "5f0749c0b051362368853541", token: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmMDc0OWMwYjA1MTM2MjM2ODg1MzU0MSIsIm5hbWUiOiJQZXJzb24gMSIsImlhdCI6MTU5NDQwNTY5OCwiZXhwIjoxNjI1OTYyNjI0fQ.tJier201g01rmMQjwZFaWNF03M0-1eubJ4_fyAGU9Gg"};
 		return (
 			<Provider store = {store}>
 			<Router>
@@ -61,18 +60,10 @@ class App extends Component {
 						<Route exact path = "/register" component={Register} />
 						<Route exact path = "/login" component={Login} />
 						<PrivateRoute exact path="/dashboard" component= { Dashboard } />
-						<Route exact path="/groups">
-							<GroupsPage account={account}/>
-						</Route>
-						<Route exact path="/group/:groupId/members">
-							<MembersPage account={account}/>
-						</Route>
-						<Route exact path="/group/:groupId/expenses">
-							<ExpensesPage account={account}/>
-						</Route>
-						<Route exact path="/group/:groupId/join/:inviteCode">
-							<JoinGroupPage account={account}/>
-						</Route>
+						<PrivateRoute exact path="/groups" component={GroupsPage}/>
+						<PrivateRoute exact path="/group/:groupId/members" component={MembersPage}/>
+						<PrivateRoute exact path="/group/:groupId/expenses" component={ExpensesPage}/>
+						<PrivateRoute exact path="/group/:groupId/join/:inviteCode" component={JoinGroupPage}/>
 						<Route>
 							404 Page Not Found
 						</Route>

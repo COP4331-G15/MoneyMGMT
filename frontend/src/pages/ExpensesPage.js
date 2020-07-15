@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {useParams} from "react-router-dom";
+import { connect } from "react-redux";
 import User from '../components/User';
 import useDarkMode from '../components/UseDarkMode';
 
@@ -67,4 +68,8 @@ function displayExpenses(expenses, account) {
 	);
 }
 
-export default ExpensesPage;
+const mapStateToProps = state => ({
+    account: state.auth.user
+});
+
+export default connect(mapStateToProps)(ExpensesPage);

@@ -1,8 +1,9 @@
 import React, { useState, useEffect} from 'react';
 import {useHistory, useParams} from 'react-router-dom';
+import { connect } from "react-redux";
 import useDarkMode from '../components/UseDarkMode';
 
-function GroupsPage({account}) {
+function JoinGroupPage({account}) {
 	useDarkMode();
 	const history = useHistory();
 	const [inviteData, setInviteData] = useState({loaded: false});
@@ -72,4 +73,8 @@ function GroupsPage({account}) {
 	);
 }
 
-export default GroupsPage;
+const mapStateToProps = state => ({
+    account: state.auth.user
+});
+
+export default connect(mapStateToProps)(JoinGroupPage);
