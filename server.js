@@ -38,14 +38,14 @@ app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
 });
 
-// passport Middleware
-app.use(passport.initialize());
+// Passport Middleware
+app.use( passport.initialize() );
 
-// passport configuration
-require("./config/passport")(passport);
+// Passport configuration
+require( "./config/passport" )( passport );
 
 // Routes
-app.use("/routes/api/users", users);
+app.use( "/api/users", users );
 
-const port = process.env.PORT || 8001;
-app.listen(port, () => console.log(`Server up and running on port ${port} !`) );
+const port = process.env.PORT || 5000;
+app.listen( port, () => console.log( `Server up and running on port ${port} !` ) );
