@@ -49,9 +49,14 @@ function GroupsPage({account}) {
 	}
 	return (
 		<div>
-			<h1>Your groups:</h1>
+			<h1 className = "H1"><span>Your</span> groups</h1>
+			<div className = 'line'></div>
 			<div>
-				<button className="meridian-button newGroupBtn" onClick={() => {setModalActive(true)}}>New group</button>
+				<button style = { {backgroundColor: 'green', position: 'absolute', right: '10px', top: '135px', fontWeight: 'bold'} } 
+						className="meridian-button newGroupBtn" 
+						onClick={() => {setModalActive(true)}}>
+						<h6 className = 'H6'>Create group</h6>
+				</button>
 			</div>
 			<div>
 				{groups}
@@ -71,13 +76,13 @@ function GroupsPage({account}) {
 
 function displayGroups(groups) {
 	return (
-		<ul className="groupList">
+		<ul style = {{left: '36%'}}className="groupList">
 			{groups.map(group => (
-				<li key={group.id} className="groupEntry">
-					<div>Name: {group.name}</div>
+				<li style = { {textAlign: 'center', backgroundColor: 'black'} }key={group.id} className="groupEntry">
+					<h5 style={{ marginTop: "0px", fontWeight: 'bold' }}>Name: {group.name}</h5>
 					{/*<div className="groupTotalExpenses">Total expenses: ${group.totalExpenses}</div>*/}
 					<div className="groupUserBalance">Your balance: <Balance bal={group.balance}/></div>
-					<div>
+					<div /*style = { {position: "absolute", left: "300px"} }*/>
 						<Link to={`/group/${group.id}/members`} className="meridian-button group__viewmembers">View members</Link>
 						<Link to={`/group/${group.id}/expenses`} className="meridian-button group__viewexpenses">View expense log</Link>
 					</div>

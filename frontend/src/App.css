@@ -1,7 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet')
+
+sans-serif;
+
 .groupList, .memberList, .expenseList {
 	list-style-type: none;
 	width: max-content;
 	min-width: 30%;
+	left: 20px;
+	position: absolute;
+	padding-top: 40px;
+	left: 36%;
+	text-align: center;
 }
 body.dark {
 	background-color: #1B1921;
@@ -19,10 +31,22 @@ input[type="text"].groupInviteLink {
 }
 .groupEntry, .groupMember, .expense {
 	padding: 15px 10px;
-	border-radius: 2px;
+	border-radius: 10px;
 	background-color: #1B1921;
-	border: 2px solid #009387;	
+	/* border: 2px solid #009387;	 */
 	margin-bottom: 10px;
+	border-top: solid;
+	border-bottom: solid;
+	border-color: #009387;
+}
+
+.groupMember:hover {
+	border-color: blue;
+}
+
+.groupEntry:hover {
+	background-color: gray;
+	border-color: blue;
 }
 /*.groupEntry, .groupMember, .expense {
 	padding: 10px;
@@ -47,11 +71,14 @@ input[type="text"].groupInviteLink {
 .meridian-button {
 	line-height: 1.15;
 	font-size: medium;
-	border: 2px solid black;
+	border: 3px solid black;
 	margin: 5px;
 	padding: 5px;
-	background-color: #009387;
+	border-radius: 5px;
+	background-color: #005d93; /*#009387*/
 	color: white;
+	font-family: 'Roboto', sans-serif;
+	letter-spacing: 1px;
 	text-decoration: none;
 	display: inline-block;
 }
@@ -63,4 +90,44 @@ input[type="text"].groupInviteLink {
 
 .meridian-button:not([disabled]):hover {
 	background-color: darkgray;
+	cursonr: pointer;
 }
+
+.createBtn {
+	width: 120px;
+	position: absolute;
+    margin-left: 43%;
+}
+
+.H1 {
+	margin-left: 13px;
+	 letter-spacing: 1px;
+	  font-family: 'Roboto';
+	  margin-bottom: 15px;
+}
+
+span {
+	/* text-decoration: underline; */
+	font-weight: bold;
+	font-family: 'Oswald';
+	font-size: 70px;
+	font-weight: 700;
+}
+
+.line {
+    border: solid;
+    color: gold;
+}
+
+.newGroupBtn {
+	background-color: green;
+	position: absolute;
+	right: 10px;
+	top: 150px;
+}
+
+.H6 {
+	margin-top: 6px;
+	margin-bottom: 6px;
+}
+

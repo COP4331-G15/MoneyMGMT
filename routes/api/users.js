@@ -110,36 +110,35 @@ router.post("/login", (req, res) => {
    });
 });
 
-/*// @route POST api/users/logout
+// @route POST api/users/logout
 // @desc Logout user
 // @access Public
-app.get('/logout', (req, res, next) => {
-   // Get the token
-   const { query } = req;
-   const { token } = query;
-   // ?token=test
-   
-   // Verify the token is one of a kind and it's not deleted.
-   UserSession.findOneAndUpdate({
-      _id: token,
-      isDeleted: false
-   }, {
-      $set: {
-         isDeleted:true
-      }
-   }, null, (err, sessions) => {
-      if (err) {
-         console.log(err);
-         return res.send({
-            success: false,
-            message: 'Error: Server error'
-         });
-      }
-      return res.send({
-         success: true,
-         message: 'Good'
-      });
-   });
-});*/
+// app.get('/logout', (req, res, next) => {
+//    // Get the token
+//    const { query } = req;
+//    const { token } = query;
+//    // ?token=test
+//    // Verify the token is one of a kind and it's not deleted.
+//    UserSession.findOneAndUpdate({
+//       _id: token,
+//       isDeleted: false
+//    }, {
+//       $set: {
+//          isDeleted:true
+//       }
+//    }, null, (err, sessions) => {
+//       if (err) {
+//          console.log(err);
+//          return res.send({
+//             success: false,
+//             message: 'Error: Server error'
+//          });
+//       }
+//       return res.send({
+//          success: true,
+//          message: 'Good'
+//       });
+//    });
+// });
 
 module.exports = router;
