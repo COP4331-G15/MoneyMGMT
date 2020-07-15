@@ -47,8 +47,9 @@ function ExpensesPage({account}) {
 		expenses = "Loading...";
 	}
 	return (<div>
-		<h1>{!expenseData.group ? null : expenseData.group.name} Expense Log</h1>
+		<h1 className = 'H1'>{!expenseData.group ? null : expenseData.group.name} Expense Log</h1>
 		{expenses}
+		<div className = 'line'></div>
 		</div>);
 }
 

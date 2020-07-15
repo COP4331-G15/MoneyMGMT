@@ -10,20 +10,20 @@ function NewGroupModal({onCancel, account, onNewGroup}) {
 		<div className="meridian-modal-content">
 			<div className="meridian-modalHeader">
 				<h1 className="meridian-modalTitle">Add group</h1>
-			<button className="meridian-button meridian-closeBtn" disabled={isSaving} onClick={() => {
-				onCancel()}}>Close</button>
+			<button style = { {backgroundColor: 'red', width: '30px'} }className="meridian-button meridian-closeBtn" disabled={isSaving} onClick={() => {
+				onCancel()}}>X</button>
 			</div>
 				<div>
 					<label>
-						<div>
+						{/* <div>
 						Group name
-						</div>
-					<input type="text" disabled={isSaving} autoFocus value={groupName || ''} onChange={(e) => {setGroupName(e.target.value)}}/>
+						</div> */}
+					<input  className = 'groupNameInput' placeholder = 'Group name here' type="text" disabled={isSaving} autoFocus value={groupName || ''} onChange={(e) => {setGroupName(e.target.value)}}/>
 					</label>
 					<div>
 						{message}
 					</div>
-					<div><button disabled={isSaving} className="meridian-button" onClick={() => {
+					<div><button disabled={isSaving} className="meridian-button createBtn" onClick={() => {
 						setIsSaving(true);
 						setMessage("Saving...");
 						fetch(`/draftapi/user/${account.id}/createGroup`, {

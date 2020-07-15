@@ -50,7 +50,7 @@ function MembersPage({account}) {
 	}
 	return (
 		<div>
-			<h1>Member List</h1>
+			<h1 className = 'H1' style = {{marginLeft: '10px'}}>Member List</h1>
 			{members}
 		</div>
 	);
@@ -60,25 +60,26 @@ function displayMembers({members, group}, account) {
 	const inviteLink = `${window.origin}/group/${group.id}/join/${group.inviteCode}`;
 	return (
 		<div>
-			<div> 
-			Invite link
-				<input type="text" readonly className="meridian-button groupInviteLink" value={inviteLink}/>
-				<button className="meridian-button" data-position="bottom" data-tooltip="Link copied"
+			<div className = 'line'></div>
+			<div style = {{marginTop: '20px', marginLeft: '40px'}}> 
+			<span style = { {fontSize: 'x-large', position: 'relative', top: '10px', height: '30px'}}>Invite link:</span>
+				<input style = { {padding: '0px 10px', borderRadius: '4px', height: '30px'} }type="text" readonly className="meridian-button groupInviteLink" value={inviteLink}/>
+				<button  style = { {paddingTop: '7.5px', paddingLeft: '5px'} }className="meridian-button" data-position="bottom" data-tooltip="Link copied"
 				onClick={(e) => {
 					navigator.clipboard.writeText(inviteLink);
 					const instance = window.M.Tooltip.init(e.target);
 					instance.open();
 					e.target.onmouseleave = () => {instance.destroy()};
 				}}>
-					<i className="material-icons left">content_copy</i>
-					Copy link
+					<i  style = { {marginRight: '7px'} } className="material-icons left">content_copy</i>
+					Copy
 				</button>
 				
 			</div>
 			<ul className="memberList">
 				{members.map(member => (
 					<li key={member.id} className="groupMember">
-						<div><User other={member} me={account}/></div>
+						<h5><User other={member} me={account}/></h5>
 						<div className="yourBalance">Your balance: <Balance bal={member.balance}/></div>
 						<div><Link to="" className="meridian-button paybackBtn">Pay back</Link></div>
 					</li>
