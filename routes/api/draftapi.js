@@ -182,6 +182,7 @@ router.get('/group/:groupId/balance/:userId', passport.authenticate('jwt', { ses
                   $match: {
                      $expr: {
                         $and: [
+                           {$eq: ["$groupId", new ObjectID(groupId)]},
                            {$eq: ["$userId", new ObjectID(userId)]},
                            {$eq: ["$other","$$otherUser"]}
                         ]
@@ -261,7 +262,7 @@ router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { sess
    if (req.body.payer !== req.user._id.toString()) {
       res.status(401);
       res.json({error:"No access"});
-      console.log(req.params.userId +" !== "+req.user._id);
+      console.log(req.body.payer +" !== "+req.user._id);
       return;
    }
 

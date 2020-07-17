@@ -9,7 +9,6 @@ const passport = require( "passport" );
 const users = require( "./routes/api/users" );
 
 const app = express();
-
 // bodyParser Middleware
 app.use(
 	bodyParser.urlencoded({
@@ -17,18 +16,6 @@ app.use(
 	})
 );
 app.use(bodyParser.json());
-
-// NEW db config
-const db = require("./config/keys").mongoURI;
-
-// NEW connect to MongoDB
-mongoose
-	.connect(
-		db,
-		{ useNewUrlParser: true, useUnifiedTopology: true }
-	)
-	.then( () => console.log("MongoDB successfully connected") )
-	.catch(err => console.log(err));
 
 app.use('/draftapi/', require('./routes/api/draftapi.js'));
 
@@ -47,5 +34,21 @@ require( "./config/passport" )( passport );
 // Routes
 app.use( "/api/users", users );
 
-const port = process.env.PORT || 5000;
-app.listen( port, () => console.log( `Server up and running on port ${port} !` ) );
+// NEW db config
+const db = require("./config/keys").mongoURI;
+
+// NEW connect to MongoDB
+async function startServer(){
+	await mongoose
+		.connect(
+			db,
+			{ useNewUrlParser: true, useUnifiedTopology: true }
+		)
+		.then( () => console.log("MongoDB successfully connected") )
+		.catch(err => console.log(err));
+	const port = process.env.PORT || 5000;
+	const server = await app.listen( port)
+	console.log(`Server listening on port ${port}`);
+	return server;
+}
+module.exports = startServer();

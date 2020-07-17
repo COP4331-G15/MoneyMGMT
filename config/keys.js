@@ -1,5 +1,5 @@
 module.exports = {
-    mongoURI: "mongodb+srv://meridianapp:KT8vgd3RotGswqFQ@cluster0-woork.mongodb.net/meridiandb?retryWrites=true&w=majority",
+    mongoURI: process.env.mongoURI || "mongodb+srv://meridianapp:KT8vgd3RotGswqFQ@cluster0-woork.mongodb.net/meridiandb?retryWrites=true&w=majority",
     secretOrKey: "secret"
 };
 
