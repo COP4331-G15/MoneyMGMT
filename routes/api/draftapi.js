@@ -265,29 +265,30 @@ router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { sess
       return;
    }
 
-   const userId = req.user._id;
+   const payerId = req.user._id;
    const groupIdStr = req.params.groupId;
-   const {description, participatingMembers, totalAmount} = req.body;
-   console.log("Splitting "+totalAmount+" among the following members of group " + groupIdStr+": " + participatingMembers);
+   const {description, billed, amount} = req.body;
+   const participatingMembers = [billed];
+   //console.log("Splitting "+amount+" among the following members of group " + groupIdStr+": " + participatingMembers);
 
-   const billed = participatingMembers.map(e => new ObjectID(e));
+   const billedIds = participatingMembers.map(e => new ObjectID(e));
    const groupId = new ObjectID(groupIdStr);
-   const result = await mongoose.connection.collection("groups").findOne( { members: { $all: billed }, _id:groupId} );
+   const result = await mongoose.connection.collection("groups").findOne( { members: { $all: [...billedIds, payerId] }, _id:groupId} );
    if (result == null) {
       res.json({error: "Invalid"});
       return;
    }
 
-   const splitCost = totalAmount / billed.length;
+   const splitCost = amount / billedIds.length;
    // TODO
    mongoose.connection.collection("balances").updateOne(
-      {groupId: groupId, userId: userId, other: {$in: billed}},
+      {groupId: groupId, userId: payerId, other: {$in: billedIds}},
       {$inc: {total: splitCost}},
       {upsert: true}
    );
-   // In the instant between these two statements, you may owe yourself money. It's probably not worth fixing
+
    mongoose.connection.collection("balances").updateOne(
-      {groupId: groupId, userId: {$in: billed}, other: userId},
+      {groupId: groupId, userId: {$in: billedIds}, other: payerId},
       {$inc: {total: -splitCost}},
       {upsert: true}
    );
@@ -296,8 +297,8 @@ router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { sess
       { $max: {lastActivity: new Date()} }
    );
 
-   const docs = billed.filter(e => e !== req.body.payer).map(billedUser => {
-      return {description: description, groupId: groupId, payer: userId, billed: billedUser, amount: splitCost, time: new Date()};
+   const docs = billedIds/*.filter(e => e !== req.body.payer)*/.map(billedUser => {
+      return {description: description, groupId: groupId, payer: payerId, billed: billedUser, amount: splitCost, time: new Date()};
    });
    mongoose.connection.collection("expenses").insertMany(docs);
    console.log(result);
