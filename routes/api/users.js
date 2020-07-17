@@ -16,6 +16,19 @@ const User = require("../../server/models/User");
 //const { brotliCompress } = require("zlib");
 const { ExtractJwt } = require("passport-jwt");
 
+// Email setup
+const nodemailer = require('nodemailer');
+const sgTransport = require('nodemailer-sendgrid-transport');
+
+var options = {
+   auth: {
+      api_user: 'atraub24@knights.ucf.edu',
+      api_key: '6KZzBfbsTq^??m$'
+  }
+}
+
+const client = nodemailer.createTransport(sgTransport(options));
+
 // @route POST api/users/register
 // @desc Register user
 // @access Public
@@ -27,6 +40,7 @@ router.post("/register", (req, res) => {
    if (!isValid) {
       return res.status(400).json(errors);
    }
+
    User.findOne({ email: req.body.email }).then(user => {
       if (user) {
          return res.status(400).json({ email: "Email already exists" });
@@ -35,7 +49,8 @@ router.post("/register", (req, res) => {
          const newUser = new User({
             name: req.body.name,
             email: req.body.email,
-            password: req.body.password
+            password: req.body.password,
+            tempToken: jwt.sign(payload, keys.secretOrKey, {expiresIn: '12000'});
          });
 
          // Hashing pwd before saving in DB
@@ -49,7 +64,91 @@ router.post("/register", (req, res) => {
                .catch(er => console.log(err));
             });
          });
+
+         // Send validation email
+         var email = {
+            from: 'Meridian Staff, staff@meridian.com',
+            to: user.email, // email , user.email , or newUser.email ?
+            subject: 'Meridian Activation Link',
+            text: 'Hello ' + user.name + ', Activation link:
+                  http://localhost:3000/activate/' + user.tempToken,
+            html: 'Hello<strong> ' + user.name +
+                  '</strong>,<br><br>Activation link:<br><br><a href="http://localhost:3000/activate/' +
+                  user.tempToken + '">http://localhost:3000/activate/</a>'
+         };
+
+         client.sendMail(email, function(err, info) {
+            if (err) {
+               console.log(error);
+            }
+            else {
+               console.log('Message sent: ' + info.response);
+            }
+         });
+
+         res.json({success: true, message: "Account has been registered! To activate your account, please check your e-mail and follow the instructions provided."});
       }
+   });
+});
+
+// @route PUT api/users/verify/:token
+// @desc Activate the user's account
+// @access Public
+router.put("/verify/:token", (req, res) => {
+   User.findOne({ temporarytoken: req.params.token }, (err, user) => {
+      if (err) throw err; // Throw error if cannot login
+
+      const token = req.params.token; // Save the token from URL for verification
+
+      console.log("the token is", token);
+
+      // Function to verify the user's token
+      jwt.verify(token, keys.secretOrKey, (err, decoded) => {
+         if (err) {
+            res.json({ success: false, message: "Activation link has expired." }); // Token is expired
+         }
+         else if (!user) {
+            res.json({ success: false, message: "Activation link has expired." }); // Token may be valid but does not match any user in the database
+         }
+         else {
+            user.temporarytoken = false; // Remove temporary token
+            user.active = true; // Change account status to Activated
+
+            // Mongoose Method to save user into the database
+            user.save(err => {
+               if (err) {
+                  console.log(err); // If unable to save user, log error info to console/terminal
+               }
+               else {
+                  // If save succeeds, create e-mail object
+                  const emailActivate = {
+                     from: "Meridian Staff, staff@meridian.com",
+                     to: user.email,
+                     subject: "Meridian Account Activated",
+                     text: `Hello ${user.name},
+                           Your account has been successfully activated!`,
+                     html: `Hello<strong> ${user.name}
+                           </strong>,<br><br>Your account has been successfully activated!`
+                  };
+
+                  // Send e-mail object to user
+                  client.sendMail(emailActivate, function(err, info) {
+                     if (err) {
+                        console.log(err);
+                     }
+                     else {
+                        console.log("Activiation Message Confirmation -  : " + info.response);
+                     }
+                  });
+
+                  res.json({
+                     succeed: true,
+                     message: "User has been successfully activated"
+                  });
+               }
+            });
+         }
+      });
    });
 });
 

@@ -18,6 +18,15 @@ const UserSchema = new Schema({
    date: {
       type: Date,
       default: Date.now
+   },
+   active: {
+      type: Boolean,
+      required: true,
+      default: false
+   },
+   tempToken: {
+      type: String,
+      required: true
    }
 });
 
