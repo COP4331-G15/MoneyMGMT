@@ -19,7 +19,7 @@ class Login extends Component {
     {
       if (this.props.auth.isAuthenticated) 
       {
-        this.props.history.push("/dashboard");
+        this.props.history.push("/groups");
       }
     }
 
@@ -27,7 +27,7 @@ class Login extends Component {
     {
       if (nextProps.auth.isAuthenticated)
       {
-        this.props.history.push("/dashboard"); // push user to dashboard when they login
+        this.props.history.push("/groups"); // push user to dashboard when they login
       }
 
       if (nextProps.errors)

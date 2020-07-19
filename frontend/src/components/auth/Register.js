@@ -20,7 +20,7 @@ class Register extends Component {
     componentDidMount() {
         // if logged in and user tries to access the Register page, they will find dashboard instead
         if (this.props.auth.isAuthenticated) {
-            this.props.history.push("/dashboard");
+            this.props.history.push("/groups");
         }
     }
 

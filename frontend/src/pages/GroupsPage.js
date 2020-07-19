@@ -76,6 +76,11 @@ function GroupsPage({account}) {
 }
 
 function displayGroups(groups) {
+	if (groups.length === 0) {
+		return (
+			<h2>You do not have any groups yet. Create one using the button at the top right.</h2>
+		)
+	}
 	return (
 		<ul style = {{left: '36%'}}className="groupList">
 			{groups.map(group => (

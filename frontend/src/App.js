@@ -17,7 +17,6 @@ import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
 import Token from "./components/auth/Token";
 import PrivateRoute from "./components/private-route/PrivateRoute";
-import Dashboard from "./components/dashboard/Dashboard";
 
 import GroupsPage from './pages/GroupsPage';
 import MembersPage from './pages/MembersPage';
@@ -61,7 +60,6 @@ class App extends Component {
 						<Route exact path = "/register" component={Register} />
 						<Route exact path = "/login" component={Login} />
 						<Route exact path = "/verify/:token" component={Token} />
-						<PrivateRoute exact path="/dashboard" component= { Dashboard } />
 						<PrivateRoute exact path="/groups" component={GroupsPage}/>
 						<PrivateRoute exact path="/group/:groupId/members" component={MembersPage}/>
 						<PrivateRoute exact path="/group/:groupId/expenses" component={ExpensesPage}/>

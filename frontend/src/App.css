@@ -92,7 +92,11 @@ input[type="text"].groupInviteLink {
 	background-color: darkgray;
 	cursonr: pointer;
 }
-
+.currentUser {
+	color: black;
+	margin: 0 2em 0 0;
+	font-size: large;
+}
 .createBtn {
 	width: 120px;
 	position: absolute;

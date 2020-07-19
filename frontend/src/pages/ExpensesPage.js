@@ -49,12 +49,17 @@ function ExpensesPage({account}) {
 	}
 	return (<div>
 		<h1 className = 'H1'>{!expenseData.group ? null : expenseData.group.name} Expense Log</h1>
-		{expenses}
 		<div className = 'line'></div>
+		{expenses}
 		</div>);
 }
 
 function displayExpenses(expenses, account) {
+	if (expenses.length === 0) {
+		return (
+			<h2>You have not recorded any expenses yet.</h2>
+		)
+	}
 	return (
 		<ul className="expenseList">
 			{expenses.map(expense => (
