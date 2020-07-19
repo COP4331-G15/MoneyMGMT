@@ -75,6 +75,7 @@ router.post("/register", (req, res) => {
                   '</strong>,<br><br>Activation link:<br><br><a href="http://localhost:3000/activate/' +
                   newUser.tempToken + '">http://localhost:3000/activate/</a>'
          };
+         console.log(newUser.email);
 
          client.sendMail(email, function(err, info) {
             if (err) {
