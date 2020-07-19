@@ -29,6 +29,12 @@ input[type="text"].groupInviteLink {
 	background-color: gray;
 	background-color: white;
 }
+select.memberSelect {
+	width: 20em;
+	max-width: 100%;
+	display: inline-block;
+	margin-bottom: 10px;
+}
 .groupEntry, .groupMember, .expense {
 	padding: 15px 10px;
 	border-radius: 10px;
@@ -128,6 +134,10 @@ span {
 	position: absolute;
 	right: 10px;
 	top: 150px;
+}
+
+.meridian-button.newGroupBtn:hover {
+	background-color: #006600;
 }
 
 .H6 {

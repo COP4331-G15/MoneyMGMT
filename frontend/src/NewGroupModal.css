@@ -58,9 +58,9 @@
     bottom: 87px;
 }
 
-#groupNameInput, #groupDescriptionInput {
+#groupNameInput, #groupDescriptionInput, #expenseDescriptionInput, #expenseAmountInput {
 	background-color: black;
-    position: relative;
+    /*position: relative;*/
     bottom: 10px;
     color: white;
     font-size: 25px;

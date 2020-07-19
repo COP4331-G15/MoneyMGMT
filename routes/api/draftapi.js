@@ -269,6 +269,31 @@ router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { sess
    const payerId = req.user._id;
    const groupIdStr = req.params.groupId;
    const {description, billed, amount} = req.body;
+   if (!ObjectID.isValid(payerId)) {
+      res.status(400);
+      res.json({error: "Invalid payer"});
+      return;
+   }
+   if (!ObjectID.isValid(groupIdStr)) {
+      res.status(400);
+      res.json({error: "Invalid group"});
+      return;
+   }
+   if (!ObjectID.isValid(billed)) {
+      res.status(400);
+      res.json({error: "Invalid billed member"});
+      return;
+   }
+   if (typeof amount !== "number" || !(amount > 0 && amount <= 50000)) {
+      res.status(400);
+      res.json({error: "Invalid amount"});
+      return;
+   }
+   if (typeof description !== "string" || description.length < 3) {
+      res.status(400);
+      res.json({error: "Invalid description"});
+      return;
+   }
    const participatingMembers = [billed];
    //console.log("Splitting "+amount+" among the following members of group " + groupIdStr+": " + participatingMembers);
 
@@ -298,8 +323,9 @@ router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { sess
       { $max: {lastActivity: new Date()} }
    );
 
+   const time = new Date();
    const docs = billedIds/*.filter(e => e !== req.body.payer)*/.map(billedUser => {
-      return {description: description, groupId: groupId, payer: payerId, billed: billedUser, amount: splitCost, time: new Date()};
+      return {description: description, groupId: groupId, payer: payerId, billed: billedUser, amount: splitCost, time:time};
    });
    mongoose.connection.collection("expenses").insertMany(docs);
    console.log(result);

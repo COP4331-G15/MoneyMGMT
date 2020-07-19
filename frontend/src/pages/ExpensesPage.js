@@ -3,14 +3,16 @@ import {useParams} from "react-router-dom";
 import { connect } from "react-redux";
 import User from '../components/User';
 import useDarkMode from '../components/UseDarkMode';
+import RecordExpenseModal from "../components/RecordExpenseModal";
 
 function ExpensesPage({account}) {
 	useDarkMode();
 
 	let { groupId } = useParams();
 	const [expenseData, setExpenseData] = useState({loaded: false});
-	useEffect(() => {
-		
+	const [modalActive, setModalActive] = useState(false);
+
+	const loadExpenses = () => {
 		fetch(`/draftapi/group/${groupId}/expenses`, {
 			headers: {
 				'Content-Type': 'application/json',
@@ -38,6 +40,9 @@ function ExpensesPage({account}) {
 				setExpenseData({loaded: false, error: "Error"});
 			}
 		)
+	};
+	useEffect(() => {
+		loadExpenses();
 	}, [groupId, account]);
 	let expenses;
 	if (expenseData.loaded) {
@@ -50,7 +55,26 @@ function ExpensesPage({account}) {
 	return (<div>
 		<h1 className = 'H1'>{!expenseData.group ? null : expenseData.group.name} Expense Log</h1>
 		<div className = 'line'></div>
+		<div>
+		<button style = { {position: 'absolute', right: '10px', top: '135px', fontWeight: 'bold'} } 
+						className="meridian-button newGroupBtn" 
+						onClick={() => {
+							setModalActive(true);
+						}}>
+						<h6 className = 'H6'>Record expense</h6>
+				</button>
+		</div>
+		<div>
 		{expenses}
+		</div>
+		{modalActive ? <RecordExpenseModal groupId={groupId} account={account} onCancel={() => {
+				setModalActive(false);}}
+				onNewExpense={() => {
+					setModalActive(false);
+					setExpenseData({loaded: false});
+					loadExpenses();
+				}}
+			/> : null}
 		</div>);
 }
 

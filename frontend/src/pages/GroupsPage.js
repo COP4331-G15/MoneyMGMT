@@ -53,7 +53,7 @@ function GroupsPage({account}) {
 			<h1 className = "H1"><span>Your</span> groups</h1>
 			<div className = 'line'></div>
 			<div>
-				<button style = { {backgroundColor: 'green', position: 'absolute', right: '10px', top: '135px', fontWeight: 'bold'} } 
+				<button style = { {position: 'absolute', right: '10px', top: '135px', fontWeight: 'bold'} } 
 						className="meridian-button newGroupBtn" 
 						onClick={() => {setModalActive(true)}}>
 						<h6 className = 'H6'>Create group</h6>
