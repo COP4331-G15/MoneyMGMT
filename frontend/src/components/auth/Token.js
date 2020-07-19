@@ -1,6 +1,6 @@
+import axios from "axios";
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { getVerifyUser } from "../../actions/tokenAction";
 
 class Token extends Component {
    constructor(props) {

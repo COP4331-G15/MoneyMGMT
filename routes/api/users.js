@@ -50,7 +50,7 @@ router.post("/register", (req, res) => {
             name: req.body.name,
             email: req.body.email,
             password: req.body.password,
-            tempToken: jwt.sign(payload, keys.secretOrKey, {expiresIn: '12000'});
+            tempToken: jwt.sign(/*payload*/{email: req.body.email}, keys.secretOrKey, {expiresIn: '12000'})
          });
 
          // Hashing pwd before saving in DB
@@ -61,32 +61,31 @@ router.post("/register", (req, res) => {
                newUser
                .save()
                .then(user => res.json(user))
-               .catch(er => console.log(err));
+               .catch(err => console.log("Error", err));
             });
          });
 
          // Send validation email
-         var email = {
+        var email = {
             from: 'Meridian Staff, staff@meridian.com',
-            to: user.email, // email , user.email , or newUser.email ?
+            to: newUser.email, // email , user.email , or newUser.email ?
             subject: 'Meridian Activation Link',
-            text: 'Hello ' + user.name + ', Activation link:
-                  http://localhost:3000/activate/' + user.tempToken,
-            html: 'Hello<strong> ' + user.name +
+            text: 'Hello ' + newUser.name + ', Activation link: http://localhost:3000/activate/' + newUser.tempToken,
+            html: 'Hello<strong> ' + newUser.name +
                   '</strong>,<br><br>Activation link:<br><br><a href="http://localhost:3000/activate/' +
-                  user.tempToken + '">http://localhost:3000/activate/</a>'
+                  newUser.tempToken + '">http://localhost:3000/activate/</a>'
          };
 
          client.sendMail(email, function(err, info) {
             if (err) {
-               console.log(error);
+               console.log(err);
             }
             else {
                console.log('Message sent: ' + info.response);
             }
          });
 
-         res.json({success: true, message: "Account has been registered! To activate your account, please check your e-mail and follow the instructions provided."});
+         //res.json({success: true, message: "Account has been registered! To activate your account, please check your e-mail and follow the instructions provided."});
       }
    });
 });
