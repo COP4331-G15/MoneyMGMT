@@ -19,6 +19,9 @@ const { ExtractJwt } = require("passport-jwt");
 // Email setup
 const nodemailer = require('nodemailer');
 const sgTransport = require('nodemailer-sendgrid-transport');
+const SENDGRID_API_KEY = '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'
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 var options = {
    auth: {
@@ -66,9 +69,9 @@ router.post("/register", (req, res) => {
          });
 
          // Send validation email
-        var email = {
+        var emailPL = {
             from: 'Meridian Staff, staff@meridian.com',
-            to: newUser.email, // email , user.email , or newUser.email ?
+            to: 'atraub24@knights.ucf.edu', // email , user.email , or newUser.email ?
             subject: 'Meridian Activation Link',
             text: 'Hello ' + newUser.name + ', Activation link: http://localhost:3000/activate/' + newUser.tempToken,
             html: 'Hello<strong> ' + newUser.name +
@@ -85,7 +88,7 @@ router.post("/register", (req, res) => {
                console.log('Message sent: ' + info.response);
             }
          });
-
+          sgMail.send(emailPL);
          //res.json({success: true, message: "Account has been registered! To activate your account, please check your e-mail and follow the instructions provided."});
       }
    });
