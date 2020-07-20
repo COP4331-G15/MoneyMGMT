@@ -81,16 +81,17 @@ function ExpensesPage({account}) {
 function displayExpenses(expenses, account) {
 	if (expenses.length === 0) {
 		return (
-			<h2>You have not recorded any expenses yet.</h2>
+			<h3 className="noExpenses">You have not recorded any expenses yet.</h3>
 		)
 	}
 	return (
 		<ul className="expenseList">
 			{expenses.map(expense => (
 				<li key={expense.id} className="expense">
-					<div><User other={expense.payer} me={account}/> paid for <User other={expense.billed} me={account}/></div>
-					<div>${expense.amount}</div>
-					<div>Description: {expense.description}</div>
+					<div className="expenseTagLine"><User other={expense.payer} me={account}/> <span className="paidFor">paid for</span> <User other={expense.billed} me={account}/></div>
+					<div className="expenseAmount">${expense.amount}</div>
+					<div className="expenseDescription">Description: {expense.description}</div>
+					<div className="expenseTime">{new Date(expense.time).toLocaleString()}</div>
 				</li>
 			))}
 	</ul>
