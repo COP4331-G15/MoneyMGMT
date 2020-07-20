@@ -69,7 +69,7 @@ function JoinGroupPage({account}) {
 		<div>
 			<h1>Join {inviteData.group.name}</h1>
 			<div>Description: {inviteData.group.description}</div>
-			<button type="meridian-button" onClick={joinGroup}>Accept</button>
+			<button class="meridian-button" onClick={joinGroup}>Accept</button>
 		</div>
 	);
 }

@@ -15,6 +15,16 @@ sans-serif;
 	left: 36%;
 	text-align: center;
 }
+.expenseList {
+	min-width: 40%;
+	left: 30%;
+}
+.paidFor {
+	font-size: x-large;
+}
+.noExpenses {
+	margin-top: 60px;
+}
 body.dark {
 	background-color: #1B1921;
 	color: white;
@@ -116,12 +126,42 @@ select.memberSelect {
 	  margin-bottom: 15px;
 }
 
-span {
+.emphasizedYour {
 	/* text-decoration: underline; */
 	font-weight: bold;
 	font-family: 'Oswald';
 	font-size: 70px;
 	font-weight: 700;
+}
+
+.expenseTagLine {
+	font-weight: bold;
+	font-size: xx-large;
+}
+
+.balancePositive, .balanceNegative, .expenseAmount {
+	/* text-decoration: underline; */
+	font-weight: bold;
+	font-family: 'Oswald';
+	font-size: xxx-large;
+	font-weight: 700;
+}
+.expenseAmount {
+	color: #005d93;
+}
+
+.expense {
+	font-size: x-large;
+	background-color: black;
+}
+
+.expenseTime {
+	font-size: medium;
+	color: gray;;
+}
+
+.expenseDescription {
+	color: white;
 }
 
 .line {

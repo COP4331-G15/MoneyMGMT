@@ -50,7 +50,7 @@ function GroupsPage({account}) {
 	}
 	return (
 		<div>
-			<h1 className = "H1"><span>Your</span> groups</h1>
+			<h1 className = "H1"><span className="emphasizedYour">Your</span> groups</h1>
 			<div className = 'line'></div>
 			<div>
 				<button style = { {position: 'absolute', right: '10px', top: '135px', fontWeight: 'bold'} } 

@@ -2,9 +2,15 @@ const router = require('express').Router();
 const passport = require('passport');
 const mongoose = require("mongoose");
 const {ObjectID} = require('mongodb');
+const crypto = require('crypto');
 
 router.get('/group/:groupId/checkInvite/:inviteCode', passport.authenticate('jwt', { session: false }),  async (req, res, next) => {
    const userId = req.user._id;
+   if (!ObjectID.isValid(req.params.groupId)) {
+      res.status(400);
+      res.json({error: "Invalid groupId"});
+      return;
+   }
    const groupId = new ObjectID(req.params.groupId);
 
    // Check the inviteCode for the given groupId and add the user to the list of members
@@ -28,6 +34,11 @@ router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { s
    }
 
    const userId = req.user._id;
+   if (!ObjectID.isValid(req.params.groupId)) {
+      res.status(400);
+      res.json({error: "Invalid groupId"});
+      return;
+   }
    const groupId = new ObjectID(req.params.groupId);
 
    // Check the inviteCode for the given groupId and add the user to the list of members
@@ -36,6 +47,7 @@ router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { s
       { $addToSet: { members: userId }, $max: {lastActivity: new Date()} }
    ).then((result) => {
       if (result.matchedCount === 0) {
+         res.status(400);
          res.json({error: "Invalid invitation"});
       }
       /*else if (result.matchedCount === 1 && result.modifiedCount !== 1) {
@@ -48,33 +60,44 @@ router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { s
 });
 
 router.post('/user/:userId/createGroup', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
-   // TODO: improve
    if (req.params.userId !== req.user._id.toString()) {
       res.status(401);
       res.json({error:"No access"});
       console.log(req.params.userId +" !== "+req.user._id);
       return;
    }
+   if (typeof req.body.name !== "string" || req.body.name.length < 1) {
+      res.status(400);
+      res.json({error: "Invalid group name"});
+      return;
+   }
+   if (typeof req.body.description !== "string" || req.body.description.length < 1) {
+      res.status(400);
+      res.json({error: "Invalid group description"});
+      return;
+   }
 
-   const groupDoc = {
-      name: req.body.name,
-      description: req.body.description || "",
-      // TODO
-      inviteCode: "totallyrandomcode",
-      lastActivity: new Date(),
-      members: [new ObjectID(req.params.userId)],
-   };
-
-   // Insert the group
-   mongoose.connection.collection("groups").insertOne(groupDoc)
-   .then((result) => {
-      res.json({success: true, group: {
-         id: groupDoc._id,
-         name: groupDoc.name,
-         description: groupDoc.description,
-         balance: 0,
-         lastActivity: groupDoc.lastActivity
-      }});
+   crypto.randomBytes(5, function(err, buffer) {
+      const token = buffer.toString('hex');
+      const groupDoc = {
+         name: req.body.name,
+         description: req.body.description || "",
+         inviteCode: token,
+         lastActivity: new Date(),
+         members: [new ObjectID(req.params.userId)],
+      };
+   
+      // Insert the group
+      mongoose.connection.collection("groups").insertOne(groupDoc)
+      .then((result) => {
+         res.json({success: true, group: {
+            id: groupDoc._id,
+            name: groupDoc.name,
+            description: groupDoc.description,
+            balance: 0,
+            lastActivity: groupDoc.lastActivity
+         }});
+      });
    });
 });
 router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
