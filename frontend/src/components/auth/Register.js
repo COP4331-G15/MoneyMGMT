@@ -151,4 +151,4 @@ const mapStateToProps = state => (
 );
 
 // connecting our React components with our Redux store vis Provider component
-export default connect(mapStateToProps, { registerUser })(withRouter(Register));
+export default connect(mapStateToProps, {registerUser})(withRouter(Register));
