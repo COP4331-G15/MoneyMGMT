@@ -26,7 +26,11 @@ const UserSchema = new Schema({
    },
    tempToken: {
       type: String,
-      required: true
+      required: false
+   },
+   resetToken: {
+      type: String,
+      required: false
    }
 });
 

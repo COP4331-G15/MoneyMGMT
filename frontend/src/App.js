@@ -16,6 +16,7 @@ import Landing from "./components/layout/Landing";
 import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
 import Token from "./components/auth/Token";
+import ResetPassword from "./components/auth/ResetPassword";
 import PrivateRoute from "./components/private-route/PrivateRoute";
 
 import GroupsPage from './pages/GroupsPage';
@@ -59,7 +60,8 @@ class App extends Component {
 						<Route exact path = "/" component={Landing} />
 						<Route exact path = "/register" component={Register} />
 						<Route exact path = "/login" component={Login} />
-						<Route exact path = "/verify/:token" component={Token} />
+						<Route exact path = "/passwordreset" component={ResetPassword}/>
+						<Route exact path = "/verify/:userId/:token" component={Token} />
 						<PrivateRoute exact path="/groups" component={GroupsPage}/>
 						<PrivateRoute exact path="/group/:groupId/members" component={MembersPage}/>
 						<PrivateRoute exact path="/group/:groupId/expenses" component={ExpensesPage}/>

@@ -19,11 +19,7 @@ app.use(bodyParser.json());
 
 app.use('/draftapi/', require('./routes/api/draftapi.js'));
 
-// React
-app.use(express.static(path.join(__dirname, 'frontend/build')));
-app.get('*', (req, res) => {
-	res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
-});
+
 
 // Passport Middleware
 app.use( passport.initialize() );
@@ -34,6 +30,11 @@ require( "./config/passport" )( passport );
 // Routes
 app.use( "/api/users", users );
 
+ // React
+app.use(express.static(path.join(__dirname, 'frontend/build')));
+app.get('*', (req, res) => {
+	res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
+});
 // NEW db config
 const db = require("./config/keys").mongoURI;
 

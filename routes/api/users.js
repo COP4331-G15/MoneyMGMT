@@ -4,7 +4,12 @@ const bcrypt = require( "bcryptjs" );
 const jwt = require( "jsonwebtoken" );
 const keys = require( "../../config/keys" );
 const passport = require("passport");
+const crypto = require('crypto');
+const {ObjectID} = require("mongodb");
 
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+console.log("API KEY", process.env.SENDGRID_API_KEY);
 // Load the input validation
 const validateRegInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
@@ -15,22 +20,6 @@ const User = require("../../server/models/User");
 //const e = require("express");
 //const { brotliCompress } = require("zlib");
 const { ExtractJwt } = require("passport-jwt");
-
-// Email setup
-const nodemailer = require('nodemailer');
-const sgTransport = require('nodemailer-sendgrid-transport');
-//const SENDGRID_API_KEY = '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'
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-var options = {
-   auth: {
-      api_user: 'atraub24@knights.ucf.edu',
-      api_key: '6KZzBfbsTq^??m$'
-  }
-}
-
-const client = nodemailer.createTransport(sgTransport(options));
 
 // @route POST api/users/register
 // @desc Register user
@@ -49,55 +38,132 @@ router.post("/register", (req, res) => {
          return res.status(400).json({ email: "Email already exists" });
       }
       else {
-         const newUser = new User({
-            name: req.body.name,
-            email: req.body.email,
-            password: req.body.password,
-            tempToken: jwt.sign(/*payload*/{email: req.body.email}, keys.secretOrKey, {expiresIn: '12000'})
-         });
-
-         // Hashing pwd before saving in DB
-         bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(newUser.password, salt, (err, hash) => {
-               if (err) throw err;
-               newUser.password = hash;
-               newUser
-               .save()
-               .then(user => res.json(user))
-               .catch(err => console.log("Error", err));
+         crypto.randomBytes(5, function(err, buffer) {
+            const token = buffer.toString('hex');
+            const newUser = new User({
+               name: req.body.name,
+               email: req.body.email,
+               password: req.body.password,
+               tempToken: token
             });
-         });
 
-         // Send validation email
-        var emailPL = {
-            from: 'staff@cop4331-test-2.herokuapp.com',
-            to: 'atraub24@knights.ucf.edu', // email , user.email , or newUser.email ?
-            subject: 'Meridian Activation Link',
-            text: 'Hello ' + newUser.name + ', Activation link: http://localhost:3000/activate/' + newUser.tempToken,
-            html: 'Hello<strong> ' + newUser.name +
-                  '</strong>,<br><br>Activation link:<br><br><a href="http://localhost:3000/activate/' +
-                  newUser.tempToken + '">http://localhost:3000/activate/</a>'
-         };
-         //console.log(newUser.email);
+            // Hashing pwd before saving in DB
+            bcrypt.genSalt(10, (err, salt) => {
+               bcrypt.hash(newUser.password, salt, (err, hash) => {
+                  if (err) {
+                     console.log("Error", err);
+                     throw err;
+                  }
+                  newUser.password = hash;
+                  newUser
+                  .save()
+                  .then(user => {
 
-         /*client.sendMail(emailPL, function(err, info) {
-            if (err) {
-               console.log(err);
-            }
-            else {
-               console.log('Message sent: ' + info.response);
-            }
-         });*/
-         sgMail.send(emailPL);
+                     const link = `http://localhost:3000/verify/${newUser._id}/${newUser.tempToken}`;
+                     var data = {
+                        //Specify email data
+                        from: "meridian@ucfclassproject.xyz",
+                        //The email to contact
+                        to: newUser.email,
+                        //Subject and text data  
+                        subject: 'Meridian - Confirm your email',
+                        html: 'Hello<strong> ' + newUser.name +
+                        '</strong>,<br><br>Activation link:<br><br><a href="' + link
+                        + '">'+link+'</a>'
+                     };
+                        sgMail.send(data);
+                        res.json({success: true, message: "Account has been registered! To activate your account, please check your e-mail and follow the instructions provided."});
+                    });
+                  })
+       
+               });
+            });
+
+            // Send validation email
+
+            //console.log(newUser.email);
+
+            /*client.sendMail(emailPL, function(err, info) {
+               if (err) {
+                  console.log(err);
+               }
+               else {
+                  console.log('Message sent: ' + info.response);
+               }
+            });*/
+            
+         }
          //res.json({success: true, message: "Account has been registered! To activate your account, please check your e-mail and follow the instructions provided."});
-      }
    });
 });
+
+router.post("/confirmEmail", (req, res) => {
+   if (!ObjectID.isValid(req.body.userId)) {
+      res.status(400);
+      res.json({error: "Invalid link"});
+      return;
+   }
+   User.findOne({_id: new ObjectID(req.body.userId), tempToken: req.body.token}).then(
+      user => {
+         if (!user) {
+            res.status(400);
+            res.json({error: "Invalid link"})
+            return;
+         }
+         user.active = true;
+         user.tempToken = "";
+         user.markModified("active");
+         user.markModified("tempToken");
+         user.save();
+         res.send(user)
+      }
+   );
+});
+
+function doPasswordReset(res, user) {
+   crypto.randomBytes(5, function(err, buffer) {
+      const token = buffer.toString('hex');
+      user.resetToken = token;
+      user.markModified("resetToken");
+      user.save((err) => {
+         const link = `http://localhost:3000/reset/${user._id}/${user.resetToken}`;
+         var data = {
+            //Specify email data
+            from: "meridian@ucfclassproject.xyz",
+            //The email to contact
+            to: user.email,
+            //Subject and text data  
+            subject: 'Meridian - Password Reset',
+            html: 'Hello<strong> ' + user.name +
+            '</strong>,<br><br>Reset link:<br><br><a href="' + link
+            + '">'+link+'</a>'
+         };
+         sgMail.send(data);
+         res.json({success: true});
+      })
+   });
+}
+
+router.post("/resetpassword", (req, res) => {
+   const email = req.body.email;
+   User.findOne({email: email}).then(
+      user => {
+         if (!user) {
+            res.status(200);
+            res.json({success: true});
+            return;
+         }
+         
+         doPasswordReset(res, user);
+      }
+   );
+});
+
 
 // @route PUT api/users/verify/:token
 // @desc Activate the user's account
 // @access Public
-router.put("/verify/:token", (req, res) => {
+/*router.put("/verify/:token", (req, res) => {
    User.findOne({ temporarytoken: req.params.token }, (err, user) => {
       if (err) throw err; // Throw error if cannot login
 
@@ -153,7 +219,7 @@ router.put("/verify/:token", (req, res) => {
          }
       });
    });
-});
+});*/
 
 // @route POST api/users/login
 // @desc Login user and return JWT Token
@@ -175,6 +241,10 @@ router.post("/login", (req, res) => {
       // Does User Exist?
       if (!user) {
          return res.status(404).json({ emailnotfound: "Email not found" });
+      }
+      if (!user.active) {
+         res.status(400).json({emailnotfound: "Email has not been verified"});
+         return;
       }
 
       // Pwd Check

@@ -1,37 +1,46 @@
-import axios from "axios";
-import React, { Component } from "react";
-import { connect } from "react-redux";
+import React, { useState, useEffect } from "react";
+import {useParams, Link} from 'react-router-dom';
 
-class Token extends Component {
-   constructor(props) {
-      super(props);
-   }
-
-   // called before initial render
-   componentWillMount() {
-      this.props.getVerifyUser(this.props.match.params.token);
-      console.log("token", this.props.match.params.token);
-   }
-
-   render() {
-      return (
+function Token() {
+   const { userId, token } = useParams();
+   const [status, setStatus] = useState({loading: true});
+   useEffect( () => {
+      let loadData = async() => {
+         const response = await fetch(`/api/users/confirmEmail`, {
+            method: 'POST',
+            body: JSON.stringify({userId: userId, token: token}),
+            headers: {
+               'Content-Type': 'application/json'
+            }
+         });
+         const result = await response.json();
+         console.log(result);
+         if (response.status !== 200 || result.error) {
+            setStatus({error: result.error || "Unknown error"});
+            return;
+         }
+         setStatus({});
+      }
+   loadData();
+   }, []);
+   let content;
+   if (status.loading) {
+      content = "Loading";
+   } else if (status.error) {
+      content = "Error: "+status.error;
+   } else {
+      content = (
          <div>
-            <h3 className="lead text-muted text-center">
-               Your activation token has been confirmed, you can now sign in.
-            </h3>
+            <h3 className="lead text-muted text-center">Confirmed</h3>
+         Go to <Link to="/login">Login</Link>
          </div>
       );
    }
+   return (
+      <div>
+            {content}
+      </div>
+   );
 }
 
-export default connect(null, {getVerifyUser})(Token);
-
-export function getVerifyUser(token) {
-   return dispatch => {
-      console.log("put request");
-      axios
-      .put(`/api/users/verify/${token}`)
-      .then(res => {})
-      .catch(err => console.log(err));
-   }
-};
+export default Token;;
