@@ -1,6 +1,5 @@
 // check localStorage for a token to keep the user logged in even if they close or refresh app (e.g until they log out or the token expires)
 
-
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
