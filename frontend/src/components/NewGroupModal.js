@@ -37,8 +37,9 @@ function NewGroupModal({onCancel, account, onNewGroup}) {
 							}
 						}).then(response => response.json().then(result => ({response, result})))
 						.then(({response, result}) => {
-							if (response.status !== 200 || response.error) {
-								setMessage("Error saving");
+							if (response.status !== 200 || result.error) {
+								setMessage("Error: "+result.error);
+								setIsSaving(false);
 								return;
 							}
 							onNewGroup(result.group);
