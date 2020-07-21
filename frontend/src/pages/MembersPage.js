@@ -81,7 +81,6 @@ function displayMembers({members, group}, account) {
 					<li key={member.id} className="groupMember">
 						<h5><User other={member} me={account}/></h5>
 						<div className="yourBalance">Your balance: <Balance bal={member.balance}/></div>
-						<div><Link to="" className="meridian-button paybackBtn">Pay back</Link></div>
 					</li>
 				))}
 			</ul>
