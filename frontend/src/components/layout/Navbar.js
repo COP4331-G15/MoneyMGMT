@@ -15,7 +15,7 @@ class Navbar extends Component {
             <div className="navbar-fixed">
                 <nav className="z-depth-0">
                     <div className="nav-wrapper white">
-                        { this.props.location.pathname.toLowerCase() === "/groups" ? null :
+                        { this.props.location.pathname.toLowerCase().indexOf("/group/") !== 0 ? null :
                         <Link
                             to="/groups"
                             className="btn waves-effect waves-light hoverable blue accent-3">
