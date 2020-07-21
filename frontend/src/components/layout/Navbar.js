@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { logoutUser } from "../../actions/authActions";
 
@@ -15,8 +15,15 @@ class Navbar extends Component {
             <div className="navbar-fixed">
                 <nav className="z-depth-0">
                     <div className="nav-wrapper white">
+                        { this.props.location.pathname.toLowerCase() === "/groups" ? null :
                         <Link
-                        to="/"
+                            to="/groups"
+                            className="btn waves-effect waves-light hoverable blue accent-3">
+                            Return to groups
+                        </Link>
+                        }
+                        <Link
+                        to="/groups"
                         style={{
                             fontFamily: "monospace"
                         }}
@@ -49,4 +56,4 @@ const mapStateToProps = state => ({
 export default connect (
     mapStateToProps,
     { logoutUser }
-)(Navbar);
+)(withRouter(Navbar));
