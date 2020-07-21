@@ -269,7 +269,7 @@ router.post("/resetPassword", (req, res) => {
                   user.markModified("password");
                   user.markModified("resetToken");
                   user.save();
-      
+
                   res.json({success: true});
 
                });

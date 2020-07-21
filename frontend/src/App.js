@@ -16,6 +16,7 @@ import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
 import Token from "./components/auth/Token";
 import Reset from "./components/auth/Reset";
+import VerifyEmail from "./components/auth/VerifyEmail";
 import ResetPassword from "./components/auth/ResetPassword";
 import PrivateRoute from "./components/private-route/PrivateRoute";
 
@@ -60,6 +61,7 @@ class App extends Component {
 						<Route exact path = "/" component={Landing} />
 						<Route exact path = "/register" component={Register} />
 						<Route exact path = "/login" component={Login} />
+						<Route exact path = "/VerifyEmail" component={VerifyEmail} />
 						<Route exact path = "/passwordreset" component={ResetPassword} />
 						<Route exact path = "/verify/:userId/:token" component={Token} />
 						<Route exact path = "/reset/:userId/:token" component={Reset} />
