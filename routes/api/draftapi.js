@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const {ObjectID} = require('mongodb');
 const crypto = require('crypto');
 
+
 router.get('/group/:groupId/checkInvite/:inviteCode', passport.authenticate('jwt', { session: false }),  async (req, res, next) => {
    const userId = req.user._id;
    if (!ObjectID.isValid(req.params.groupId)) {
@@ -21,9 +22,10 @@ router.get('/group/:groupId/checkInvite/:inviteCode', passport.authenticate('jwt
       res.json({error: "Invalid invitation"});
       return;
    }
-   
+
    res.json({group: {name: result.name, description: result.description || ""}})
 });
+
 
 router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
    // Check that the user is authorized
@@ -59,6 +61,7 @@ router.post('/group/:groupId/join/:inviteCode', passport.authenticate('jwt', { s
    });
 });
 
+
 router.post('/user/:userId/createGroup', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
    if (req.params.userId !== req.user._id.toString()) {
       res.status(401);
@@ -86,7 +89,7 @@ router.post('/user/:userId/createGroup', passport.authenticate('jwt', { session:
          lastActivity: new Date(),
          members: [new ObjectID(req.params.userId)],
       };
-   
+
       // Insert the group
       mongoose.connection.collection("groups").insertOne(groupDoc)
       .then((result) => {
@@ -100,6 +103,8 @@ router.post('/user/:userId/createGroup', passport.authenticate('jwt', { session:
       });
    });
 });
+
+
 router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false }),  (req, res, next) => {
    // TODO: improve
    if (req.params.userId !== req.user._id.toString()) {
@@ -165,6 +170,7 @@ router.get('/user/:userId/groups', passport.authenticate('jwt', { session: false
       res.json({groups: returnedGroups});
    });
 });
+
 
 router.get('/group/:groupId/balance/:userId', passport.authenticate('jwt', { session: false }), (req, res, next) => {
    const {groupId, userId} = req.params;
@@ -233,6 +239,7 @@ router.get('/group/:groupId/balance/:userId', passport.authenticate('jwt', { ses
    });
 });
 
+
 router.get('/group/:groupId/expenses', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
    const {groupId} = req.params;
    const result = await mongoose.connection.collection("groups").findOne( { members: req.user._id, _id: new ObjectID(groupId)} );
@@ -279,6 +286,7 @@ router.get('/group/:groupId/expenses', passport.authenticate('jwt', { session: f
 
    res.json({expenses: returnedExpenses, group: {groupId: groupId, name: result.name}});
 });
+
 
 router.post('/group/:groupId/recordExpense', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
    // TODO: improve

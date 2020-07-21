@@ -1,15 +1,12 @@
-const express = require( "express" );
+const express = require("express");
 const router = express.Router();
-const bcrypt = require( "bcryptjs" );
-const jwt = require( "jsonwebtoken" );
-const keys = require( "../../config/keys" );
-const passport = require("passport");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const crypto = require('crypto');
+const passport = require("passport");
 const {ObjectID} = require("mongodb");
+const keys = require("../../config/keys");
 
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-console.log("API KEY", process.env.SENDGRID_API_KEY);
 // Load the input validation
 const validateRegInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
@@ -21,8 +18,14 @@ const User = require("../../server/models/User");
 //const { brotliCompress } = require("zlib");
 const { ExtractJwt } = require("passport-jwt");
 
+// Email setup
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+console.log("API KEY", process.env.SENDGRID_API_KEY);
+
+
 // @route POST api/users/register
-// @desc Register user
+// @desc Register user and send verification email
 // @access Public
 router.post("/register", (req, res) => {
    // Form Validation
@@ -40,6 +43,7 @@ router.post("/register", (req, res) => {
       else {
          crypto.randomBytes(5, function(err, buffer) {
             const token = buffer.toString('hex');
+            // Create the new user
             const newUser = new User({
                name: req.body.name,
                email: req.body.email,
@@ -54,55 +58,46 @@ router.post("/register", (req, res) => {
                      console.log("Error", err);
                      throw err;
                   }
+
                   newUser.password = hash;
                   newUser
                   .save()
                   .then(user => {
-
+                     // The link that will be sent to the user to for them to activate their account
                      const link = `http://localhost:3000/verify/${newUser._id}/${newUser.tempToken}`;
+                     // The email payload
                      var data = {
-                        //Specify email data
-                        from: "meridian@ucfclassproject.xyz",
-                        //The email to contact
-                        to: newUser.email,
-                        //Subject and text data  
-                        subject: 'Meridian - Confirm your email',
+                        to: newUser.email,                        // The email to contact
+                        from: "meridian@ucfclassproject.xyz",     // Specify email data
+                        subject: 'Meridian - Confirm your email', // Subject
+                        text: 'Hello ' + newUser.name + ', Activation link: ' +
+                              link,                               // For when HTML doesn't work
                         html: 'Hello<strong> ' + newUser.name +
-                        '</strong>,<br><br>Activation link:<br><br><a href="' + link
-                        + '">'+link+'</a>'
+                              '</strong>,<br><br>Activation link:<br><br><a href="' +
+                              link + '">'+link+'</a>'             // HTML message of the email
                      };
-                        sgMail.send(data);
-                        res.json({success: true, message: "Account has been registered! To activate your account, please check your e-mail and follow the instructions provided."});
-                    });
-                  })
-       
-               });
+                     // Send the email
+                     sgMail.send(data);
+                     // Successful email verification message
+                     res.json({success: true, message: "Account has been registered! To activate your account, please check your e-mail and follow the instructions provided."});
+                  });
+               })
             });
-
-            // Send validation email
-
-            //console.log(newUser.email);
-
-            /*client.sendMail(emailPL, function(err, info) {
-               if (err) {
-                  console.log(err);
-               }
-               else {
-                  console.log('Message sent: ' + info.response);
-               }
-            });*/
-            
-         }
-         //res.json({success: true, message: "Account has been registered! To activate your account, please check your e-mail and follow the instructions provided."});
+         });
+      }
    });
 });
 
+// @route POST api/users/confirmEmail
+// @desc Confirms account when their email verification link is clicked
+// @access Public
 router.post("/confirmEmail", (req, res) => {
    if (!ObjectID.isValid(req.body.userId)) {
       res.status(400);
       res.json({error: "Invalid link"});
       return;
    }
+
    User.findOne({_id: new ObjectID(req.body.userId), tempToken: req.body.token}).then(
       user => {
          if (!user) {
@@ -110,42 +105,24 @@ router.post("/confirmEmail", (req, res) => {
             res.json({error: "Invalid link"})
             return;
          }
+
          user.active = true;
          user.tempToken = "";
          user.markModified("active");
          user.markModified("tempToken");
          user.save();
+
          res.send(user)
       }
    );
 });
 
-function doPasswordReset(res, user) {
-   crypto.randomBytes(5, function(err, buffer) {
-      const token = buffer.toString('hex');
-      user.resetToken = token;
-      user.markModified("resetToken");
-      user.save((err) => {
-         const link = `http://localhost:3000/reset/${user._id}/${user.resetToken}`;
-         var data = {
-            //Specify email data
-            from: "meridian@ucfclassproject.xyz",
-            //The email to contact
-            to: user.email,
-            //Subject and text data  
-            subject: 'Meridian - Password Reset',
-            html: 'Hello<strong> ' + user.name +
-            '</strong>,<br><br>Reset link:<br><br><a href="' + link
-            + '">'+link+'</a>'
-         };
-         sgMail.send(data);
-         res.json({success: true});
-      })
-   });
-}
-
+// @route POST api/users/ResetPassword
+// @desc Resets account password
+// @access Public
 router.post("/resetpassword", (req, res) => {
    const email = req.body.email;
+
    User.findOne({email: email}).then(
       user => {
          if (!user) {
@@ -153,73 +130,36 @@ router.post("/resetpassword", (req, res) => {
             res.json({success: true});
             return;
          }
-         
-         doPasswordReset(res, user);
+
+         //doPasswordReset(res, user);
+         crypto.randomBytes(5, function(err, buffer) {
+            const token = buffer.toString('hex');
+
+            user.resetToken = token;
+            user.markModified("resetToken");
+            user.save((err) => {
+               // The link that will be sent to the user to for them to activate their account
+               const link = `http://localhost:3000/reset/${user._id}/${user.resetToken}`;
+               // The email payload
+               var data = {
+                  to: user.email,                       // The email to contact
+                  from: "meridian@ucfclassproject.xyz", // Specify email data
+                  subject: 'Meridian - Password Reset', // Subject
+                  text: 'Hello ' + newUser.name + ', Reset link: ' +
+                        link,                           // For when HTML doesn't work
+                  html: 'Hello<strong> ' + user.name +
+                        '</strong>,<br><br>Reset link:<br><br><a href="' +
+                        link + '">' + link + '</a>'     // HTML message of the email
+               };
+               // Send the email
+               sgMail.send(data);
+
+               res.json({success: true});
+            })
+         });
       }
    );
 });
-
-
-// @route PUT api/users/verify/:token
-// @desc Activate the user's account
-// @access Public
-/*router.put("/verify/:token", (req, res) => {
-   User.findOne({ temporarytoken: req.params.token }, (err, user) => {
-      if (err) throw err; // Throw error if cannot login
-
-      const token = req.params.token; // Save the token from URL for verification
-
-      console.log("the token is", token);
-
-      // Function to verify the user's token
-      jwt.verify(token, keys.secretOrKey, (err, decoded) => {
-         if (err) {
-            res.json({ success: false, message: "Activation link has expired." }); // Token is expired
-         }
-         else if (!user) {
-            res.json({ success: false, message: "Activation link has expired." }); // Token may be valid but does not match any user in the database
-         }
-         else {
-            user.temporarytoken = false; // Remove temporary token
-            user.active = true; // Change account status to Activated
-
-            // Mongoose Method to save user into the database
-            user.save(err => {
-               if (err) {
-                  console.log(err); // If unable to save user, log error info to console/terminal
-               }
-               else {
-                  // If save succeeds, create e-mail object
-                  const emailActivate = {
-                     from: "Meridian Staff, staff@meridian.com",
-                     to: user.email,
-                     subject: "Meridian Account Activated",
-                     text: `Hello ${user.name},
-                           Your account has been successfully activated!`,
-                     html: `Hello<strong> ${user.name}
-                           </strong>,<br><br>Your account has been successfully activated!`
-                  };
-
-                  // Send e-mail object to user
-                  client.sendMail(emailActivate, function(err, info) {
-                     if (err) {
-                        console.log(err);
-                     }
-                     else {
-                        console.log("Activiation Message Confirmation -  : " + info.response);
-                     }
-                  });
-
-                  res.json({
-                     succeed: true,
-                     message: "User has been successfully activated"
-                  });
-               }
-            });
-         }
-      });
-   });
-});*/
 
 // @route POST api/users/login
 // @desc Login user and return JWT Token
@@ -242,6 +182,7 @@ router.post("/login", (req, res) => {
       if (!user) {
          return res.status(404).json({ emailnotfound: "Email not found" });
       }
+      // Did the user verify their email
       if (!user.active) {
          res.status(400).json({emailnotfound: "Email has not been verified"});
          return;
@@ -277,12 +218,97 @@ router.post("/login", (req, res) => {
          }
          else {
             return res
-               .status(400)
-               .json({ passwordincorrect: "Password incorrect" });
+            .status(400)
+            .json({ passwordincorrect: "Password incorrect" });
          }
       });
    });
 });
+
+// function doPasswordReset(res, user) {
+//    crypto.randomBytes(5, function(err, buffer) {
+//       const token = buffer.toString('hex');
+//       user.resetToken = token;
+//       user.markModified("resetToken");
+//       user.save((err) => {
+//          const link = `http://localhost:3000/reset/${user._id}/${user.resetToken}`;
+//          var data = {
+//             //Specify email data
+//             from: "meridian@ucfclassproject.xyz",
+//             //The email to contact
+//             to: user.email,
+//             //Subject and text data
+//             subject: 'Meridian - Password Reset',
+//             html: 'Hello<strong> ' + user.name +
+//             '</strong>,<br><br>Reset link:<br><br><a href="' + link
+//             + '">'+link+'</a>'
+//          };
+//          sgMail.send(data);
+//          res.json({success: true});
+//       })
+//    });
+// }
+
+// @route PUT api/users/verify/:token
+// @desc Activate the user's account
+// @access Public
+// router.put("/verify/:token", (req, res) => {
+//    User.findOne({ temporarytoken: req.params.token }, (err, user) => {
+//       if (err) throw err; // Throw error if cannot login
+//
+//       const token = req.params.token; // Save the token from URL for verification
+//
+//       console.log("the token is", token);
+//
+//       // Function to verify the user's token
+//       jwt.verify(token, keys.secretOrKey, (err, decoded) => {
+//          if (err) {
+//             res.json({ success: false, message: "Activation link has expired." }); // Token is expired
+//          }
+//          else if (!user) {
+//             res.json({ success: false, message: "Activation link has expired." }); // Token may be valid but does not match any user in the database
+//          }
+//          else {
+//             user.temporarytoken = false; // Remove temporary token
+//             user.active = true; // Change account status to Activated
+//
+//             // Mongoose Method to save user into the database
+//             user.save(err => {
+//                if (err) {
+//                   console.log(err); // If unable to save user, log error info to console/terminal
+//                }
+//                else {
+//                   // If save succeeds, create e-mail object
+//                   const emailActivate = {
+//                      from: "Meridian Staff, staff@meridian.com",
+//                      to: user.email,
+//                      subject: "Meridian Account Activated",
+//                      text: `Hello ${user.name},
+//                            Your account has been successfully activated!`,
+//                      html: `Hello<strong> ${user.name}
+//                            </strong>,<br><br>Your account has been successfully activated!`
+//                   };
+//
+//                   // Send e-mail object to user
+//                   client.sendMail(emailActivate, function(err, info) {
+//                      if (err) {
+//                         console.log(err);
+//                      }
+//                      else {
+//                         console.log("Activiation Message Confirmation -  : " + info.response);
+//                      }
+//                   });
+//
+//                   res.json({
+//                      succeed: true,
+//                      message: "User has been successfully activated"
+//                   });
+//                }
+//             });
+//          }
+//       });
+//    });
+// });
 
 // @route POST api/users/logout
 // @desc Logout user
