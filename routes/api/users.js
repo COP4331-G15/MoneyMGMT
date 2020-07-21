@@ -10,6 +10,7 @@ const keys = require("../../config/keys");
 // Load the input validation
 const validateRegInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
+const validatePassReset = require("../../validation/passReset");
 
 // Load User Model
 const User = require("../../server/models/User");
@@ -21,7 +22,7 @@ const { ExtractJwt } = require("passport-jwt");
 // Email setup
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-console.log("API KEY", process.env.SENDGRID_API_KEY);
+//console.log("API KEY", process.env.SENDGRID_API_KEY);
 
 
 // @route POST api/users/register
@@ -64,6 +65,7 @@ router.post("/register", (req, res) => {
                   .save()
                   .then(user => {
                      // The link that will be sent to the user to for them to activate their account
+                     //const link = `http://localhost:3000/verify/${newUser._id}/${newUser.tempToken}`;
                      const link = `https://cop4331-test-2.herokuapp.com/verify/${newUser._id}/${newUser.tempToken}`;
                      // The email payload
                      var data = {
@@ -98,67 +100,21 @@ router.post("/confirmEmail", (req, res) => {
       return;
    }
 
-   User.findOne({_id: new ObjectID(req.body.userId), tempToken: req.body.token}).then(
-      user => {
-         if (!user) {
-            res.status(400);
-            res.json({error: "Invalid link"})
-            return;
-         }
-
-         user.active = true;
-         user.tempToken = "";
-         user.markModified("active");
-         user.markModified("tempToken");
-         user.save();
-
-         res.send(user)
+   User.findOne({_id: new ObjectID(req.body.userId), tempToken: req.body.token}).then(user => {
+      if (!user) {
+         res.status(400);
+         res.json({error: "Invalid link"})
+         return;
       }
-   );
-});
 
-// @route POST api/users/ResetPassword
-// @desc Resets account password
-// @access Public
-router.post("/resetpassword", (req, res) => {
-   const email = req.body.email;
+      user.active = true;
+      user.tempToken = "";
+      user.markModified("active");
+      user.markModified("tempToken");
+      user.save();
 
-   User.findOne({email: email}).then(
-      user => {
-         if (!user) {
-            res.status(200);
-            res.json({success: true});
-            return;
-         }
-
-         //doPasswordReset(res, user);
-         crypto.randomBytes(5, function(err, buffer) {
-            const token = buffer.toString('hex');
-
-            user.resetToken = token;
-            user.markModified("resetToken");
-            user.save((err) => {
-               // The link that will be sent to the user to for them to activate their account
-               const link = `https://cop4331-test-2.herokuapp.com/reset/${user._id}/${user.resetToken}`;
-               // The email payload
-               var data = {
-                  to: user.email,                       // The email to contact
-                  from: "meridian@ucfclassproject.xyz", // Specify email data
-                  subject: 'Meridian - Password Reset', // Subject
-                  text: 'Hello ' + newUser.name + ', Reset link: ' +
-                        link,                           // For when HTML doesn't work
-                  html: 'Hello<strong> ' + user.name +
-                        '</strong>,<br><br>Reset link:<br><br><a href="' +
-                        link + '">' + link + '</a>'     // HTML message of the email
-               };
-               // Send the email
-               sgMail.send(data);
-
-               res.json({success: true});
-            })
-         });
-      }
-   );
+      res.send(user)
+   });
 });
 
 // @route POST api/users/login
@@ -177,7 +133,7 @@ router.post("/login", (req, res) => {
    const password = req.body.password;
 
    // Find user by email
-   User.findOne({ email }).then(user => {
+   User.findOne({email}).then(user => {
       // Does User Exist?
       if (!user) {
          return res.status(404).json({ emailnotfound: "Email not found" });
@@ -189,7 +145,7 @@ router.post("/login", (req, res) => {
       }
 
       // Pwd Check
-      bcrypt.compare(password, user.password).then( isMatch => {
+      bcrypt.compare(password, user.password).then(isMatch => {
          if (isMatch) {
             // Match , Create JWT payload
             const payload = {
@@ -225,6 +181,91 @@ router.post("/login", (req, res) => {
    });
 });
 
+// @route POST api/users/forgotPassword
+// @desc Sends an email for a password reset
+// @access Public
+router.put("/forgotPassword", (req, res) => {
+   const email = req.body.email;
+
+   User.findOne({email: email}).then(user => {
+      // If the email isn't linked to an account, just say it worked
+      if (!user) {
+         res.status(200);
+         res.json({success: true});
+         return;
+      }
+
+      //doPasswordReset(res, user);
+      crypto.randomBytes(5, function(err, buffer) {
+         const token = buffer.toString('hex');
+
+         user.resetToken = token;
+         user.markModified("resetToken");
+         user.save((err) => {
+            // The link that will be sent to the user to for them to activate their account
+            //const link = `http://localhost:3000/reset/${user._id}/${user.resetToken}`;
+            const link = `https://cop4331-test-2.herokuapp.com/reset/${user._id}/${user.resetToken}`;
+            // The email payload
+            var data = {
+               to: user.email,                       // The email to contact
+               from: "meridian@ucfclassproject.xyz", // Specify email data
+               subject: 'Meridian - Password Reset', // Subject
+               text: 'Hello ' + user.name + ', Reset link: ' +
+               link,                                 // For when HTML doesn't work
+               html: 'Hello<strong> ' + user.name +
+               '</strong>,<br><br>Reset link:<br><br><a href="' +
+               link + '">' + link + '</a>'           // HTML message of the email
+            };
+            // Send the email
+            sgMail.send(data);
+
+            res.json({success: true});
+         })
+      });
+   });
+});
+
+// @route POST api/users/ResetPassword
+// @desc Resets account password
+// @access Public
+router.put("/resetPassword"), (req, res) => {
+   // Form validation
+   const { errors, isValid } = validateLoginInput(req.body);
+
+   // Check validation
+   if (!isValid) {
+      return res.status(400).json(errors);
+   }
+
+   const resetToken = req.body.resetToken;
+   const password = req.body.passwordNew;
+
+   // Determine if the password is to be updated
+   if (!resetToken) {
+      // If the token is missing return an error
+      return res.status(401).json({error: "Authentication error."});
+   }
+   else {
+      // Update the password
+      User.findOne({resetToken: resetToken}).then(user => {
+         if (!user) {
+            // If the token doesn't match a user return an error
+            return res.status(401).json({error: "No user with this token found."});
+         }
+         else {
+            // Update the user's info
+            user.password = password;
+            user.resetToken = "";
+            user.markModified("password");
+            user.markModified("resetToken");
+            user.save();
+
+            res.send(user)
+         }
+      });
+   }
+}
+
 // function doPasswordReset(res, user) {
 //    crypto.randomBytes(5, function(err, buffer) {
 //       const token = buffer.toString('hex');
@@ -258,7 +299,7 @@ router.post("/login", (req, res) => {
 //
 //       const token = req.params.token; // Save the token from URL for verification
 //
-//       console.log("the token is", token);
+//       console.log("the token is ", token);
 //
 //       // Function to verify the user's token
 //       jwt.verify(token, keys.secretOrKey, (err, decoded) => {

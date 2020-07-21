@@ -14,7 +14,7 @@ function ResetPassword() {
       setEmailSent(true);
 
       const sendRequest = async () => {
-         const response = await fetch(`/api/users/resetpassword`, {
+         const response = await fetch(`/api/users/forgotPassword`, {
             method: 'POST',
             body: JSON.stringify({email: email}),
             headers: { 'Content-Type': 'application/json' }
