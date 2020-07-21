@@ -184,7 +184,7 @@ router.post("/login", (req, res) => {
 // @route POST api/users/forgotPassword
 // @desc Sends an email for a password reset
 // @access Public
-router.put("/forgotPassword", (req, res) => {
+router.post("/forgotPassword", (req, res) => {
    const email = req.body.email;
 
    User.findOne({email: email}).then(user => {
@@ -228,18 +228,21 @@ router.put("/forgotPassword", (req, res) => {
 // @route POST api/users/ResetPassword
 // @desc Resets account password
 // @access Public
-router.put("/resetPassword"), (req, res) => {
+router.post("/resetPassword", (req, res) => {
    // Form validation
-   const { errors, isValid } = validateLoginInput(req.body);
+   const { errors, isValid } = validatePassReset(req.body);
 
    // Check validation
    if (!isValid) {
-      return res.status(400).json(errors);
+      return res.status(400).json({errors: errors});
    }
 
    const resetToken = req.body.resetToken;
-   const password = req.body.passwordNew;
-
+   const userId = req.body.userId;
+   const password = req.body.password;
+   if (!ObjectID.isValid(userId)) {
+      return res.status(401).json({errors: {password: "Invalid password reset link"}});
+   }
    // Determine if the password is to be updated
    if (!resetToken) {
       // If the token is missing return an error
@@ -247,24 +250,35 @@ router.put("/resetPassword"), (req, res) => {
    }
    else {
       // Update the password
-      User.findOne({resetToken: resetToken}).then(user => {
+      User.findOne({_id: new ObjectID(userId), resetToken: resetToken}).then(user => {
          if (!user) {
             // If the token doesn't match a user return an error
-            return res.status(401).json({error: "No user with this token found."});
+            return res.status(401).json({errors: {password: "Invalid password reset link"}});
          }
          else {
             // Update the user's info
-            user.password = password;
-            user.resetToken = "";
-            user.markModified("password");
-            user.markModified("resetToken");
-            user.save();
+            bcrypt.genSalt(10, (err, salt) => {
+               bcrypt.hash(password, salt, (err, hash) => {
+                  if (err) {
+                     console.log("Error", err);
+                     throw err;
+                  }
 
-            res.send(user)
+                  user.password = hash;
+                  user.resetToken = "";
+                  user.markModified("password");
+                  user.markModified("resetToken");
+                  user.save();
+      
+                  res.json({success: true});
+
+               });
+            });
+
          }
       });
    }
-}
+});
 
 // function doPasswordReset(res, user) {
 //    crypto.randomBytes(5, function(err, buffer) {

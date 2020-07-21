@@ -5,17 +5,17 @@ module.exports = function validatePassReset(data) {
    let errors = {};
 
    // Convert empty fields to an empty string so we can use validator functions
-   data.passwordNew = !isEmpty(data.passwordNew) ? data.passwordNew : "";
-   data.passwordNew2 = !isEmpty(data.passwordNew2) ? data.passwordNew2 : "";
+   data.password = !isEmpty(data.password) ? data.password : "";
+   data.password2 = !isEmpty(data.password2) ? data.password2 : "";
 
    // Password checks
-   if (Validator.isEmpty(data.passwordNew)) {
-      errors.passwordNew = "New password is required";
+   if (Validator.isEmpty(data.password)) {
+      errors.password = "New password is required";
    }
-   if (!Validator.isLength(data.passwordNew, { min: 6, max: 30 })) {
+   if (!Validator.isLength(data.password, { min: 6, max: 30 })) {
       errors.password = "Password must be at least 6 characters";
    }
-   if (!Validator.equals(data.passwordNew, data.passwordNew2)) {
+   if (!Validator.equals(data.password, data.password2)) {
       errors.password2 = "Passwords must match";
    }
 
