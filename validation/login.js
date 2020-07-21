@@ -21,8 +21,6 @@ module.exports = function validateLoginInput(data) {
       errors.password = "Password field is required";
    }
 
-   // CHECK IF ACCOUNT IS ACTIVE
-
    return {
       errors,
       isValid: isEmpty(errors)
