@@ -64,7 +64,7 @@ router.post("/register", (req, res) => {
                   .save()
                   .then(user => {
                      // The link that will be sent to the user to for them to activate their account
-                     const link = `http://localhost:3000/verify/${newUser._id}/${newUser.tempToken}`;
+                     const link = `https://cop4331-test-2.herokuapp.com/verify/${newUser._id}/${newUser.tempToken}`;
                      // The email payload
                      var data = {
                         to: newUser.email,                        // The email to contact
@@ -139,7 +139,7 @@ router.post("/resetpassword", (req, res) => {
             user.markModified("resetToken");
             user.save((err) => {
                // The link that will be sent to the user to for them to activate their account
-               const link = `http://localhost:3000/reset/${user._id}/${user.resetToken}`;
+               const link = `https://cop4331-test-2.herokuapp.com/reset/${user._id}/${user.resetToken}`;
                // The email payload
                var data = {
                   to: user.email,                       // The email to contact
