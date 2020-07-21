@@ -4,6 +4,7 @@ import "../NewGroupModal.css";
 function RecordExpenseModal({onCancel, account, groupId, onNewExpense}) {
 	const [description, setDescription] = useState("");
 	const [amount, setAmount] = useState("");
+	const [amountStr, setAmountStr] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
 	const [message, setMessage] = useState();
 	const [membersData, setMembersData] = useState({loaded: false});
@@ -60,11 +61,18 @@ function RecordExpenseModal({onCancel, account, groupId, onNewExpense}) {
 						</div> */}
 						Billed Member: {memberSelect}
 					<input id='expenseDescriptionInput' placeholder = 'Expense description' type="text" disabled={isSaving} autoFocus value={description} onChange={(e) => {setDescription(e.target.value)}}/>
-					<input id='expenseAmountInput' placeholder = 'Amount' type="number" disabled={isSaving} value={amount} onChange={(e) => {setAmount(e.target.valueAsNumber)}}/>
-					<div>
+					<input id='expenseAmountInput' placeholder = 'Amount' type="number" disabled={isSaving} value={amount} onChange={(e) => {setAmount(e.target.valueAsNumber); setAmountStr(e.target.value);}}/>
+					<div style={{color: "red"}}>
 						{message}
 					</div>
 					<div><button disabled={isSaving} className="meridian-button createBtn" onClick={() => {
+						if (amountStr.indexOf(".") !== -1) {
+							const idx = amountStr.indexOf(".");
+							if (amountStr.length - idx > 3) {
+								setMessage("Error: Amount should only have two decimal places");
+								return;
+							}
+						}
 						setIsSaving(true);
 						setMessage("Saving...");
 						fetch(`/draftapi/group/${groupId}/recordExpense`, {
@@ -90,7 +98,7 @@ function RecordExpenseModal({onCancel, account, groupId, onNewExpense}) {
 
 					}}>Save</button></div></div>);
 	} else if (membersData.error) {
-		modalBody = (<div>{membersData.error}</div>);
+		modalBody = (<div style={{color: "red"}}>{membersData.error}</div>);
 	}else {
 		modalBody = (<div>Loading</div>);
 	}
